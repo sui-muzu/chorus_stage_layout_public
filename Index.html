@@ -1,0 +1,2720 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <base target="_top">
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #d1d5db;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --danger: #dc2626;
+      --S: #fce7f3;
+      --A: #e0f2fe;
+      --T: #dcfce7;
+      --B: #fef3c7;
+      --empty: #f3f4f6;
+      --selected: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    header { padding: 18px 22px; background: #111827; color: #fff; }
+    header h1 { margin: 0; font-size: 20px; letter-spacing: .03em; }
+    header p { margin: 4px 0 0; color: #d1d5db; font-size: 13px; }
+    main { max-width: 1180px; margin: 0 auto; padding: 18px; }
+    .grid { display: grid; grid-template-columns: 360px 1fr; gap: 16px; align-items: start; }
+    .panel { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; box-shadow: 0 2px 8px rgba(15,23,42,.04); }
+    .panel h2 { font-size: 16px; margin: 0 0 10px; }
+    .panel h3 { font-size: 14px; margin: 18px 0 8px; color: #374151; }
+    .grid > *, .panel, .sidebar, .work-panel { min-width: 0; }
+
+    .start-card { width: 100%; max-width: 100%; overflow: hidden; border: 1px solid var(--line); border-radius: 14px; padding: 12px; background: #fbfdff; display: grid; gap: 10px; }
+    .start-card-head { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; align-items: start; }
+    .start-card-head > div { min-width: 0; }
+    .start-card .row { min-width: 0; }
+    .start-card button { white-space: normal; line-height: 1.25; }
+    .start-card .row button { flex: 1 1 150px; min-width: 0; }
+    .start-card .web-count-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .start-card > button { width: 100%; }
+    .start-number { width: 30px; height: 30px; border-radius: 999px; background: var(--accent); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; }
+    .start-title { font-weight: 800; font-size: 14px; margin-bottom: 2px; }
+    .start-desc { color: var(--muted); font-size: 12px; margin: 0; }
+    .common-settings { border-top: 1px dashed #cbd5e1; padding-top: 12px; }
+    .custom-template-box { border: 1px dashed #bfdbfe; background: #f8fbff; border-radius: 12px; padding: 10px; }
+    .custom-template-box textarea { min-height: 112px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; line-height: 1.45; }
+    .custom-template-preview { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 8px; white-space: pre-wrap; }
+    .paste-area { min-height: 150px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; line-height: 1.45; }
+    .file-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .file-row input[type="file"] { max-width: 100%; font-size: 12px; }
+    label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    input[type="text"], input[type="number"], select, textarea {
+      width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--text); font-size: 14px;
+    }
+    input[type="number"] { text-align: right; }
+    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .stack { display: grid; gap: 10px; }
+    button { border: 0; border-radius: 10px; padding: 9px 12px; background: var(--accent); color: #fff; font-weight: 600; cursor: pointer; transition: transform .05s ease, opacity .15s ease; }
+    button:hover { opacity: .9; }
+    button:active { transform: translateY(1px); }
+    button.secondary { background: #4b5563; }
+    button.ghost { background: #eef2ff; color: #1f2937; }
+    button.light { background: #f3f4f6; color: #1f2937; border: 1px solid var(--line); }
+    button.danger { background: var(--danger); }
+    button.small { padding: 5px 8px; border-radius: 8px; font-size: 12px; }
+    button.square { width: 30px; height: 30px; padding: 0; border-radius: 999px; }
+    button.toggle-on { background: #f59e0b; color: #111827; }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    .muted { color: var(--muted); font-size: 12px; }
+    .summary { background: #f9fafb; border: 1px solid var(--line); border-radius: 10px; padding: 10px; font-size: 13px; }
+    .counts { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 8px; }
+    .count-box { border: 1px solid var(--line); border-radius: 10px; padding: 8px 6px; text-align: center; background: #fff; }
+    .count-box strong { display: block; font-size: 18px; }
+    .web-count-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .part-config { display: grid; gap: 8px; margin-bottom: 10px; }
+    .part-config .row { align-items: stretch; }
+    .row-count-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+    .row-count-grid label { display: flex; align-items: center; gap: 4px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--text); font-size: 12px; }
+    .web-count-grid label { text-align: center; }
+    .count-stepper { display: grid; gap: 4px; }
+    .count-control { display: grid; grid-template-columns: 34px minmax(48px, 1fr) 34px; gap: 5px; align-items: center; }
+    .count-control input { text-align: center; font-weight: 800; font-size: 17px; padding: 8px 4px; }
+    .mobile-menu-button { display: none; }
+    .mobile-editor-menu-open { align-items: stretch; }
+    .zoom-pill { position: absolute; right: 12px; bottom: 12px; z-index: 25; display: none; gap: 6px; align-items: center; background: rgba(255,255,255,.9); border: 1px solid var(--line); border-radius: 999px; padding: 5px 7px; box-shadow: 0 2px 10px rgba(15,23,42,.12); font-size: 12px; }
+    .stage-wrap.touch-canvas { overflow: hidden; touch-action: none; }
+    .stage-inner.zoomed { transform-origin: 0 0; will-change: transform; }
+    .mobile-drag-ghost { position: fixed; z-index: 2000; pointer-events: none; display: flex; gap: 4px; align-items: center; padding: 6px; border-radius: 14px; background: rgba(17,24,39,.88); box-shadow: 0 14px 34px rgba(15,23,42,.28); transform: translate(-50%, -50%); }
+    .mobile-drag-ghost .seat { width: 68px; min-height: 42px; box-shadow: none; }
+    .mobile-insert-preview { position: fixed; z-index: 1300; pointer-events: none; transform: translate(-50%, -100%); background: rgba(17,24,39,.94); color: #fff; border-radius: 999px; padding: 7px 11px; font-size: 12px; font-weight: 800; box-shadow: 0 10px 24px rgba(15,23,42,.25); white-space: nowrap; }
+    .mobile-insert-line { position: fixed; z-index: 1290; pointer-events: none; width: 4px; border-radius: 999px; background: #2563eb; box-shadow: 0 0 0 4px rgba(37,99,235,.18); transform: translateX(-50%); }
+    .seat.mobile-drag-source { opacity: .35; }
+    .tray-toggle { display: none; }
+
+    .tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .tab { background: #fff; color: var(--text); border: 1px solid var(--line); }
+    .tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .hidden { display: none !important; }
+    .layout-list { display: grid; gap: 8px; max-height: 420px; overflow: auto; padding-right: 3px; }
+    .layout-item { border: 1px solid var(--line); border-radius: 12px; background: #fff; padding: 10px; }
+    .layout-item-title { font-weight: 700; margin-bottom: 4px; }
+    .layout-item .row { justify-content: space-between; margin-top: 8px; }
+    .warning { margin-top: 8px; background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; border-radius: 10px; padding: 8px 10px; font-size: 12px; white-space: pre-wrap; }
+    .candidate-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+    .candidate { border: 1px solid var(--line); border-radius: 14px; padding: 12px; background: #fff; }
+    .candidate h3 { margin-top: 0; font-size: 15px; }
+    .candidate-table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 8px 0; }
+    .candidate-table th, .candidate-table td { border-bottom: 1px solid #e5e7eb; padding: 4px; text-align: center; }
+    .candidate-table th:first-child, .candidate-table td:first-child { text-align: left; }
+
+    body.editor-mode main { max-width: none; padding: 14px 18px 20px; }
+    body.editor-mode .grid { display: block; }
+    body.editor-mode .sidebar { display: none; }
+    body.editor-mode .work-panel { max-width: none; border: 0; box-shadow: none; background: transparent; padding: 0; }
+    body.editor-mode .tabs { display: none; }
+    .editor-toolbar { position: sticky; top: 0; z-index: 20; align-items: center; background: rgba(246,247,251,.96); border: 1px solid var(--line); border-radius: 14px; padding: 10px; box-shadow: 0 2px 12px rgba(15,23,42,.08); }
+    .editor-title-input { width: min(360px, 100%); min-width: 220px; }
+    .editor-shell { width: 100%; }
+    .stage-wrap { position: relative; background: linear-gradient(#fff, #f8fafc); border: 1px solid var(--line); border-radius: 16px; padding: 18px; overflow-x: auto; text-align: center; }
+    .selection-box { position: fixed; z-index: 1200; border: 1px solid var(--accent); background: rgba(37,99,235,.12); pointer-events: none; border-radius: 4px; }
+    .sheet-link-box { margin: 8px 0 12px; padding: 10px 12px; border: 1px solid #bfdbfe; border-radius: 12px; background: #eff6ff; font-size: 13px; }
+    .sheet-link-box a { color: #1d4ed8; font-weight: 800; text-decoration: underline; }
+    .draft-banner { margin: 0 0 12px; padding: 12px; border: 1px solid #fbbf24; border-radius: 14px; background: #fffbeb; color: #78350f; display: grid; gap: 8px; }
+    .draft-banner-title { font-weight: 800; }
+    .draft-banner .row { justify-content: flex-start; }
+    .auto-save-status { color: var(--muted); font-size: 12px; padding: 0 4px; white-space: nowrap; }
+    body.mobile-ui .auto-save-status { max-width: 7.5em; overflow: hidden; text-overflow: ellipsis; }
+    .stage-inner { display: inline-block; min-width: min-content; margin: 0 auto; text-align: left; }
+    .stage-title { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; margin-bottom: 12px; }
+    .stage-title h2 { margin: 0; font-size: 18px; }
+    .stage { width: max-content; min-width: 720px; margin: 0 auto; padding: 10px 0 18px; text-align: center; }
+    .stage-row-block { margin: 16px 0; }
+    .row-label { text-align: center; color: var(--muted); font-size: 12px; margin-bottom: 5px; }
+    .stage-row { display: flex; gap: 4px; justify-content: center; align-items: center; min-height: 54px; width: max-content; margin: 0 auto; padding: 2px 4px; border-radius: 14px; transition: transform .12s ease; }
+    .stage-row.staggered { transform: translateX(var(--row-shift, 0px)); }
+    .stage-row.drag-over { background: rgba(37,99,235,.06); }
+    .insert-zone { width: 15px; min-height: 48px; border-radius: 999px; border: 2px dashed transparent; flex: 0 0 15px; }
+    .insert-zone.drag-over { border-color: var(--accent); background: var(--accent-soft); }
+    .row-plus { flex: 0 0 auto; }
+    .seat { width: 76px; min-height: 46px; border-radius: 10px; border: 1px solid #9ca3af; background: #fff; padding: 4px 5px; text-align: center; cursor: grab; user-select: none; box-shadow: 0 1px 2px rgba(0,0,0,.05); touch-action: manipulation; }
+    .seat:active { cursor: grabbing; }
+    .seat.S { background: var(--S); }
+    .seat.A { background: var(--A); }
+    .seat.T { background: var(--T); }
+    .seat.B { background: var(--B); }
+    .seat.empty { background: var(--empty); color: #9ca3af; border-style: dashed; }
+    .seat.selected { outline: 3px solid var(--selected); transform: translateY(-1px); }
+    .seat.dragging { opacity: .45; }
+    .seat.tray-seat { opacity: .96; }
+    .seat-part { font-weight: 800; font-size: 12px; line-height: 1.1; }
+    .seat-name { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .seat-label { font-size: 11px; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .conductor { margin: 22px auto 0; width: 78px; border: 1px solid #9ca3af; border-radius: 999px; padding: 6px; text-align: center; font-size: 12px; color: #374151; background: #fff; }
+    .legend { display: flex; gap: 8px; flex-wrap: wrap; font-size: 12px; color: #374151; margin-top: 10px; }
+    .legend span { padding: 3px 7px; border-radius: 999px; border: 1px solid var(--line); }
+    .legend .S { background: var(--S); }
+    .legend .A { background: var(--A); }
+    .legend .T { background: var(--T); }
+    .legend .B { background: var(--B); }
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 14px; }
+    .tray-wrap { margin: 18px auto 0; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: #fff; box-shadow: 0 1px 4px rgba(15,23,42,.04); max-width: min(1120px, 100%); }
+    .tray-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; margin-bottom: 8px; }
+    .tray-title { font-weight: 800; font-size: 14px; }
+    .palette { display: flex; gap: 7px; flex-wrap: wrap; margin: 8px 0; }
+    .palette-chip { display: inline-flex; align-items: center; justify-content: center; min-width: 58px; min-height: 34px; border-radius: 999px; border: 1px solid var(--line); cursor: grab; font-size: 12px; font-weight: 800; color: #1f2937; user-select: none; }
+    .palette-chip.S { background: var(--S); }
+    .palette-chip.A { background: var(--A); }
+    .palette-chip.T { background: var(--T); }
+    .palette-chip.B { background: var(--B); }
+    .palette-chip.empty { background: var(--empty); color: #6b7280; border-style: dashed; }
+    .tray-list { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; min-height: 58px; padding: 8px; border-radius: 12px; background: #f9fafb; border: 1px dashed #cbd5e1; }
+    .tray-list.drag-over { border-color: var(--accent); background: var(--accent-soft); }
+    .trash-drop { min-width: 120px; min-height: 44px; border-radius: 12px; border: 2px dashed #fca5a5; background: #fef2f2; color: #991b1b; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; padding: 4px 10px; }
+    .trash-drop.drag-over { background: #fee2e2; border-color: var(--danger); }
+    .stage-note { margin: 8px 0 0; color: var(--muted); font-size: 12px; text-align: center; }
+    .context-menu { position: fixed; z-index: 1000; background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 12px 32px rgba(15,23,42,.18); padding: 6px; min-width: 180px; }
+    .context-menu button { width: 100%; text-align: left; justify-content: flex-start; background: #fff; color: #1f2937; border-radius: 8px; padding: 8px 10px; font-weight: 500; }
+    .context-menu button:hover { background: #f3f4f6; opacity: 1; }
+    .context-menu .danger-item { color: var(--danger); }
+    .context-separator { height: 1px; background: #e5e7eb; margin: 5px 2px; }
+    .modal-backdrop { position: fixed; inset: 0; z-index: 900; background: rgba(15,23,42,.35); display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .modal { width: min(440px, 100%); background: #fff; border-radius: 16px; padding: 16px; box-shadow: 0 18px 45px rgba(15,23,42,.22); }
+    .modal h2 { margin: 0 0 12px; font-size: 18px; }
+    .modal-grid { display: grid; gap: 10px; }
+    .print-only { display: none; }
+    @media (max-width: 880px) {
+      .grid { grid-template-columns: 1fr; }
+      main { padding: 10px; }
+      header { padding: 14px; }
+      .stage { min-width: 640px; }
+      .web-count-grid { grid-template-columns: repeat(2, 1fr); }
+      .count-control { grid-template-columns: 42px minmax(54px, 1fr) 42px; }
+      .count-control button { min-height: 42px; font-size: 18px; }
+      .count-control input { min-height: 42px; }
+      body.editor-mode main { padding: 6px; }
+      .editor-toolbar { position: sticky; top: 0; z-index: 60; padding: 7px; border-radius: 12px; gap: 6px; }
+      .editor-title-input { min-width: 0; flex: 1 1 140px; padding: 7px 8px; }
+      .mobile-menu-button { display: inline-flex; align-items: center; justify-content: center; }
+      .editor-toolbar button:not(.mobile-primary):not(.mobile-menu-button) { display: none; }
+      .editor-toolbar.mobile-editor-menu-open { display: grid; grid-template-columns: 1fr 82px 44px; }
+      .editor-toolbar.mobile-editor-menu-open button:not(.mobile-primary):not(.mobile-menu-button) { display: block; width: 100%; grid-column: 1 / -1; text-align: left; }
+      .stage-wrap { height: calc(100dvh - 118px); min-height: 330px; padding: 0; overflow: hidden; touch-action: none; }
+      .stage-inner { margin: 0; }
+      .stage-title { display: none; }
+      .stage-note { display: none; }
+      .stage { margin: 0; padding: 12px 12px 54px; }
+      .row-plus { display: none !important; }
+      .insert-zone { min-height: 44px; }
+      .seat { width: 72px; min-height: 44px; }
+      .zoom-pill { display: flex; }
+      .tray-toggle { display: block; width: 100%; border-radius: 12px 12px 0 0; background: #111827; color: #fff; }
+      .tray-wrap { position: fixed; left: 8px; right: 8px; bottom: 0; z-index: 80; margin: 0; max-width: none; max-height: 46dvh; overflow: auto; padding: 6px 10px 10px; border-radius: 14px 14px 0 0; transform: translateY(calc(100% - 48px)); transition: transform .18s ease; box-shadow: 0 -8px 24px rgba(15,23,42,.18); }
+      .tray-wrap.open { transform: translateY(0); }
+      .tray-head { margin-top: 4px; }
+      .palette { gap: 5px; }
+      .palette-chip { min-width: 50px; min-height: 32px; }
+    }
+    @media (max-width: 880px) and (orientation: landscape) {
+      header { display: none; }
+      body.editor-mode main { padding: 4px; }
+      .editor-toolbar { position: fixed; right: 8px; bottom: 8px; top: auto; left: auto; width: min(260px, 48vw); background: rgba(246,247,251,.9); }
+      .editor-title-input { display: none; }
+      .stage-wrap { height: calc(100dvh - 8px); min-height: 240px; }
+      .tray-wrap { left: 8px; right: auto; width: min(420px, 58vw); }
+    }
+
+    /* JSで判定したスマホUI。横向きで幅が880pxを超えても適用する。 */
+    body.mobile-ui header { padding: 14px; }
+    body.mobile-ui .grid { grid-template-columns: 1fr; }
+    body.mobile-ui main { padding: 10px; }
+    body.mobile-ui .web-count-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    body.mobile-ui .count-control { grid-template-columns: 42px minmax(54px, 1fr) 42px; }
+    body.mobile-ui .count-control button { min-height: 42px; font-size: 18px; }
+    body.mobile-ui .count-control input { min-height: 42px; }
+    body.mobile-ui.editor-mode main { padding: 6px; }
+    body.mobile-ui .editor-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      padding: 7px;
+      border-radius: 12px;
+      gap: 6px;
+      display: flex;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      align-items: center;
+    }
+    body.mobile-ui .editor-title-input { display: none; }
+    body.mobile-ui .mobile-menu-button { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+    body.mobile-ui .mobile-primary,
+    body.mobile-ui .mobile-always { display: inline-flex !important; align-items: center; justify-content: center; flex: 0 0 auto; white-space: nowrap; }
+    body.mobile-ui .editor-toolbar button:not(.mobile-primary):not(.mobile-menu-button):not(.mobile-always) { display: none; }
+    body.mobile-ui .editor-toolbar.mobile-editor-menu-open {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, auto));
+      overflow: visible;
+      align-items: stretch;
+    }
+    body.mobile-ui .editor-toolbar.mobile-editor-menu-open .mobile-primary,
+    body.mobile-ui .editor-toolbar.mobile-editor-menu-open .mobile-always,
+    body.mobile-ui .editor-toolbar.mobile-editor-menu-open .mobile-menu-button {
+      grid-column: auto;
+      width: auto;
+    }
+    body.mobile-ui .editor-toolbar.mobile-editor-menu-open button:not(.mobile-primary):not(.mobile-menu-button):not(.mobile-always) {
+      display: block;
+      width: 100%;
+      grid-column: 1 / -1;
+      text-align: left;
+    }
+    body.mobile-ui .stage-wrap { height: calc(100dvh - 118px); min-height: 330px; padding: 0; overflow: hidden; touch-action: none; }
+    body.mobile-ui .stage-inner { margin: 0; }
+    body.mobile-ui .stage-title { display: none; }
+    body.mobile-ui .stage-note { display: none; }
+    body.mobile-ui .stage { min-width: 640px; margin: 0; padding: 12px 12px 54px; }
+    body.mobile-ui .row-plus { display: none !important; }
+    body.mobile-ui .insert-zone { min-height: 44px; }
+    body.mobile-ui .seat { width: 72px; min-height: 44px; }
+    body.mobile-ui .row-plus { display: inline-flex !important; align-items: center; justify-content: center; width: 30px; height: 30px; }
+    body.mobile-ui .tray-list,
+    body.mobile-ui .tray-list .seat,
+    body.mobile-ui .palette-chip { touch-action: none; }
+    body.mobile-ui .zoom-pill { display: flex; }
+    body.mobile-ui .tray-toggle { display: block; width: 100%; border-radius: 12px 12px 0 0; background: #111827; color: #fff; }
+    body.mobile-ui .tray-wrap { position: fixed; left: 8px; right: 8px; bottom: 0; z-index: 80; margin: 0; max-width: none; max-height: 46dvh; overflow: auto; padding: 6px 10px 10px; border-radius: 14px 14px 0 0; transform: translateY(calc(100% - 48px)); transition: transform .18s ease; box-shadow: 0 -8px 24px rgba(15,23,42,.18); }
+    body.mobile-ui .tray-wrap.open { transform: translateY(0); }
+    body.mobile-ui .tray-head { margin-top: 4px; }
+    body.mobile-ui .palette { gap: 5px; }
+    body.mobile-ui .palette-chip { min-width: 50px; min-height: 32px; }
+    body.mobile-ui.mobile-landscape header { display: none; }
+    body.mobile-ui.mobile-landscape.editor-mode main { padding: 4px; }
+    body.mobile-ui.mobile-landscape .editor-toolbar {
+      position: fixed;
+      right: 8px;
+      bottom: 8px;
+      top: auto;
+      left: auto;
+      width: auto;
+      max-width: calc(100vw - 16px);
+      background: rgba(246,247,251,.93);
+      box-shadow: 0 6px 18px rgba(15,23,42,.16);
+    }
+    body.mobile-ui.mobile-landscape .editor-toolbar button { padding: 6px 8px; font-size: 12px; }
+    body.mobile-ui.mobile-landscape .stage-wrap { height: calc(100dvh - 8px); min-height: 240px; }
+    body.mobile-ui.mobile-landscape .tray-wrap { left: 8px; right: auto; width: min(420px, 58vw); }
+
+    @media print {
+      body { background: #fff; }
+      header, .sidebar, .tabs, .toolbar, .no-print, .tray-wrap, .context-menu, .modal-backdrop { display: none !important; }
+      main { max-width: none; padding: 0; }
+      .grid { display: block; }
+      .panel { border: 0; box-shadow: none; padding: 0; }
+      .stage-wrap { border: 0; padding: 0; overflow: visible; }
+      .stage { min-width: 0; }
+      .stage-inner { display: block; }
+      .seat { break-inside: avoid; }
+      .insert-zone, .row-plus { display: none !important; }
+      .print-only { display: block; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>合唱ステージ配置メーカー</h1>
+  <p>名簿・人数から配置案を作り、ブラウザ内保存や配置ファイルで扱える公開版です。</p>
+</header>
+
+<main>
+  <div class="grid">
+    <section class="panel sidebar">
+      <h2>配置の作り方</h2>
+      <div class="stack">
+        <div>
+          <label for="layoutTitle">配置タイトル</label>
+          <input id="layoutTitle" type="text" placeholder="例：2026定演 本番配置案">
+        </div>
+
+        <div class="start-card">
+          <div class="start-card-head">
+            <span class="start-number">1</span>
+            <div>
+              <div class="start-title">名簿が既にある場合</div>
+              <p class="start-desc">Excelやスプレッドシートに「氏名・パート」の一覧がある場合はこちら。表をコピーして下の欄に貼り付けるか、CSV/TSVファイルを読み込みます。</p>
+            </div>
+          </div>
+          <label for="memberPasteText">名簿を貼り付け</label>
+          <textarea id="memberPasteText" class="paste-area" placeholder="氏名	パート
+山田花子	S
+佐藤明子	A
+
+ExcelやGoogleスプレッドシートから2列をコピーして貼り付けできます。"></textarea>
+          <div class="file-row">
+            <input id="memberCsvFile" type="file" accept=".csv,.txt,.tsv,text/csv,text/plain" onchange="loadMembersFileAsNew(event)">
+          </div>
+          <div class="row">
+            <button onclick="loadMembersAsNew()">貼り付け名簿から新規配置を作成</button>
+            <button class="ghost" onclick="loadMembersFileButton()">CSV/TSVファイルから作成</button>
+          </div>
+          <div class="muted">入力データは運営側のスプレッドシートには保存されません。保存はこのブラウザ内、または配置ファイルで行います。</div>
+          <div id="inputSheetLinkBox" class="sheet-link-box hidden"></div>
+        </div>
+
+        <div class="start-card">
+          <div class="start-card-head">
+            <span class="start-number">2</span>
+            <div>
+              <div class="start-title">各パートの人数だけ分かっている場合</div>
+              <p class="start-desc">名前は後で入力し、まずは各パートの人数だけで配置案を作成します。パート構成はSATB・8声部・カスタムから選べます。</p>
+            </div>
+          </div>
+          <div class="part-config">
+            <label for="partPreset">パート構成</label>
+            <select id="partPreset" onchange="changePartPreset()">
+              <option value="SATB">SATB</option>
+              <option value="8VOICE">S1 / S2 / A1 / A2 / T1 / T2 / B1 / B2</option>
+              <option value="SSAA">SSAA</option>
+              <option value="TTBB">TTBB</option>
+              <option value="CUSTOM">カスタム</option>
+            </select>
+            <div id="customPartsBox" class="hidden">
+              <label for="customPartsInput">カスタムパート</label>
+              <div class="row">
+                <input id="customPartsInput" type="text" value="S1,S2,A1,A2,T1,T2,B1,B2" placeholder="例：S1,S2,A1,A2,T1,T2,B1,B2">
+                <button type="button" class="small ghost" onclick="applyCustomParts()">反映</button>
+              </div>
+              <div class="muted">カンマ区切りで入力します。名簿のパート名と合わせてください。</div>
+            </div>
+          </div>
+          <div id="webCountControls" class="web-count-grid mobile-friendly-counts"></div>
+          <button onclick="loadWebCountsAsNew()">この人数で配置案を作成</button>
+        </div>
+
+        <div id="sourceSummary" class="summary">まだ読み込んでいません。</div>
+        <div id="warnings" class="warning hidden"></div>
+      </div>
+
+      <h3>共通設定</h3>
+      <div class="stack common-settings">
+        <div>
+          <label for="partOrder">パート順</label>
+          <select id="partOrder"></select>
+          <div class="muted">人数入力欄や名簿から読み込んだパート構成に合わせて候補を作ります。</div>
+        </div>
+        <div>
+          <label for="staggerMode">千鳥配置</label>
+          <select id="staggerMode" onchange="setStaggerModeFromInput()">
+            <option value="none">なし</option>
+            <option value="even" selected>偶数段を右に半マスずらす</option>
+            <option value="odd">奇数段を右に半マスずらす</option>
+          </select>
+          <div class="muted">表示上だけ段を半マスずらします。保存・印刷にも反映されます。</div>
+        </div>
+        <div>
+          <label for="layoutTemplate">配置パターン</label>
+          <select id="layoutTemplate" onchange="setLayoutTemplateFromInput()">
+            <option value="vertical" selected>パート別・縦縞</option>
+            <option value="femaleFrontMaleRear">女声前列 / 男声後列</option>
+            <option value="maleCenterFemaleSides">男声中央 / 女声両端</option>
+            <option value="mixed">混合配置</option>
+            <option value="custom">カスタム</option>
+          </select>
+          <div id="layoutTemplateDesc" class="muted">全段にパート順のブロックで配置します。</div>
+          <div id="customTemplateBox" class="custom-template-box hidden" style="margin-top:8px;">
+            <label for="customTemplateText">カスタムテンプレート</label>
+            <textarea id="customTemplateText" oninput="setCustomTemplateFromInput()" placeholder="後列:T,B&#10;中列:S,A,T,B&#10;前列:S,A"></textarea>
+            <div class="row" style="margin-top:6px;">
+              <button type="button" class="small ghost" onclick="resetCustomTemplateText()">現在のパートで初期化</button>
+              <button type="button" class="small light" onclick="updateCustomTemplatePreview()">プレビュー更新</button>
+            </div>
+            <div class="muted" style="margin-top:6px;">1行ずつ、後列から前列の順に「列名: パート,パート」と入力します。候補列数と行数が違う場合は、前・中・後ろの指定を自動で補間します。</div>
+            <div id="customTemplatePreview" class="custom-template-preview muted" style="margin-top:6px;"></div>
+          </div>
+        </div>
+        <div>
+          <label>候補を作る列数</label>
+          <div class="row-count-grid">
+            <label><input type="checkbox" name="rows" value="2"> 2列</label>
+            <label><input type="checkbox" name="rows" value="3" checked> 3列</label>
+            <label><input type="checkbox" name="rows" value="4" checked> 4列</label>
+            <label><input type="checkbox" name="rows" value="5" checked> 5列</label>
+            <label><input type="checkbox" name="rows" value="6"> 6列</label>
+          </div>
+          <div class="muted">通常は3〜5列、少人数や特殊配置では2列・6列も選べます。</div>
+        </div>
+        <button class="ghost" onclick="generateCandidates()">現在の条件で配置案を再生成</button>
+      </div>
+
+      <h3>保存済み配置</h3>
+      <div class="row">
+        <button class="small light" onclick="refreshLayouts()">再読み込み</button>
+        <button class="small ghost" onclick="newBlank()">新規</button>
+        <button class="small ghost" onclick="openLayoutFilePicker()">配置ファイルを開く</button>
+      </div>
+      <input id="layoutFileInput" type="file" accept=".choruslayout,.json,application/json" class="hidden" onchange="importLayoutFile(event)">
+      <input id="nameCsvInput" type="file" accept=".csv,.txt,.tsv,text/csv,text/plain" class="hidden" onchange="importNameEntryCsv(event)">
+      <div id="layoutList" class="layout-list" style="margin-top:8px;"></div>
+    </section>
+
+    <section class="panel work-panel">
+      <div class="tabs no-print">
+        <button id="tabCandidates" class="tab active" onclick="showTab('candidates')">候補</button>
+        <button id="tabEditor" class="tab" onclick="showTab('editor')">編集・印刷</button>
+      </div>
+
+      <div id="candidatePane">
+        <div id="draftBanner" class="draft-banner hidden no-print"></div>
+        <h2>配置候補</h2>
+        <p class="muted">左の「名簿が既にある場合」または「人数だけ分かっている場合」から配置案を作成してください。</p>
+        <div id="candidateGrid" class="candidate-grid"></div>
+      </div>
+
+      <div id="editorPane" class="hidden">
+        <div class="toolbar editor-toolbar no-print">
+          <input id="layoutTitleEditor" class="editor-title-input" type="text" placeholder="配置タイトル" oninput="syncTitleFromEditor()">
+          <span id="autoSaveStatus" class="auto-save-status no-print"></span>
+          <button class="mobile-primary" onclick="saveCurrentLayout()">保存</button>
+          <button class="light mobile-menu-button" onclick="toggleMobileEditorMenu(event)">☰</button>
+          <button class="secondary" onclick="saveAsCopy()">コピー保存</button>
+          <button class="ghost" onclick="window.print()">印刷 / PDF</button>
+          <button class="ghost" onclick="exportLayoutAsPng()">PNG画像</button>
+          <button class="ghost" onclick="exportCurrentLayoutFile()">配置ファイル保存</button>
+          <button class="light" onclick="openLayoutFilePicker()">配置ファイルを開く</button>
+          <button class="light" onclick="showTab('candidates')">候補へ戻る</button>
+          <button class="light" onclick="toggleDisplayMode()" id="displayModeBtn">表示: 氏名</button>
+          <button class="light mobile-always" onclick="undoLayout()" id="undoBtn">元に戻す</button>
+          <button class="light mobile-always" onclick="redoLayout()" id="redoBtn">やり直し</button>
+          <button class="light mobile-always" onclick="toggleMultiSelectMode()" id="multiSelectBtn">複数選択: OFF</button>
+          <button class="light" onclick="moveSelectedToTray()">選択を未配置へ</button>
+          <button class="light" onclick="reverseRowsHorizontally()">左右反転</button>
+          <button class="light" onclick="renumberSeatLabels()">仮番号を振り直す</button>
+          <button class="ghost" onclick="openNameEntrySheet()">名前入力CSVを保存</button>
+          <button class="light" onclick="applyNamesFromNameEntrySheet()">名前CSVを反映</button>
+        </div>
+        <div id="sheetLinkBox" class="sheet-link-box hidden no-print"></div>
+        <div class="editor-shell">
+          <div id="stageContainer" class="stage-wrap"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div id="contextMenu" class="context-menu hidden"></div>
+<div id="editModal" class="modal-backdrop hidden"></div>
+
+<script>
+let PARTS = ['S', 'A', 'T', 'B'];
+let PART_NAMES = { S: 'Sop', A: 'Alt', T: 'Ten', B: 'Bass' };
+const PART_PRESETS = {
+  SATB: ['S', 'A', 'T', 'B'],
+  '8VOICE': ['S1', 'S2', 'A1', 'A2', 'T1', 'T2', 'B1', 'B2'],
+  SSAA: ['S1', 'S2', 'A1', 'A2'],
+  TTBB: ['T1', 'T2', 'B1', 'B2'],
+};
+const PART_COLOR_PALETTE = ['#fef3c7', '#dcfce7', '#dbeafe', '#fce7f3', '#ede9fe', '#ccfbf1', '#ffedd5', '#e0f2fe', '#fef9c3', '#f3e8ff', '#fee2e2', '#ecfccb'];
+const STRATEGIES = [
+  { key: 'balanced', name: '均等型', desc: '列ごとの人数差を小さくします。' },
+  { key: 'rear', name: '後列厚め', desc: '余り人数を後列寄りに置きます。' },
+  { key: 'front', name: '前列厚め', desc: '余り人数を前列寄りに置きます。' },
+];
+const LAYOUT_TEMPLATES = [
+  { key: 'vertical', name: 'パート別・縦縞', desc: '全段にパート順のブロックで配置します。' },
+  { key: 'femaleFrontMaleRear', name: '女声前列 / 男声後列', desc: 'S/A系を前寄り、T/B系を後ろ寄りに分けて配置します。' },
+  { key: 'maleCenterFemaleSides', name: '男声中央 / 女声両端', desc: '左右方向でS系→T系→B系→A系の順に並べ、男声を中央に寄せます。' },
+  { key: 'mixed', name: '混合配置', desc: 'パート順を繰り返して小グループ単位で混ぜます。' },
+  { key: 'custom', name: 'カスタム', desc: '行ごとに指定したパートだけを配置対象にします。' },
+];
+
+let state = freshState();
+let candidates = [];
+let historyStack = [];
+let historyIndex = -1;
+let longPressTimer = null;
+let clickSuppressUntil = 0;
+let singleClickTimer = null;
+let rangeSelection = null;
+let mobileToolbarOpen = false;
+let mobileView = { enabled: false, zoom: 1, panX: 0, panY: 0, fitDone: false, pointers: new Map(), gesture: null };
+let mobileSeatPress = null;
+let mobileSeatDrag = null;
+const AUTO_DRAFT_KEY = 'chorusStageLayoutDraft.v1';
+let autoSaveTimer = null;
+let lastAutoSaveAt = '';
+
+window.addEventListener('load', function() {
+  updateDeviceClasses();
+  refreshLayouts();
+  updateSummary();
+  updateHistoryButtons();
+  setupRangeSelection();
+  setupStageBackgroundClick();
+  setupMobileCanvasGestures();
+  initPartUI();
+  renderDraftBanner();
+  setTimeout(showStartupDraftNotice, 250);
+  window.addEventListener('beforeunload', function(){ saveDraftNow('beforeunload'); });
+  window.addEventListener('resize', debounce(function(){ updateDeviceClasses(); if (document.body.classList.contains('editor-mode')) fitStageToScreen(true); }, 180));
+});
+
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById('contextMenu');
+  if (!menu.classList.contains('hidden') && !menu.contains(e.target)) hideContextMenu();
+});
+
+document.addEventListener('pointerdown', function(e) {
+  // スマホ横画面などで編集メニューを開いた後、キャンバスや余白をタップしたら安全に折りたたむ。
+  if (!mobileToolbarOpen || !isMobileLike()) return;
+  const toolbar = document.querySelector('.editor-toolbar');
+  if (toolbar && toolbar.contains(e.target)) return;
+  closeMobileEditorMenu();
+}, { passive: true });
+document.addEventListener('keydown', function(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); e.shiftKey ? redoLayout() : undoLayout(); }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') { e.preventDefault(); redoLayout(); }
+  if (e.key === 'Escape') { hideContextMenu(); closeEditModal(); clearSelection(); }
+  if (e.key === 'Delete' || e.key === 'Backspace') {
+    if (document.activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
+    if (state.selectedIds && state.selectedIds.length) { e.preventDefault(); deleteSelectedSeats(); }
+  }
+});
+
+function freshState() {
+  return {
+    layout_id: '', title: '', sourceMode: '', members: [], counts: emptyCounts(),
+    parts: PARTS.slice(), rowCount: 0, rows: [], unplaced: [], partOrder: PARTS.slice(), staggerMode: 'even', layoutTemplate: 'vertical', customTemplateText: '', displayMode: 'name',
+    selectedIds: [], lastSelectedId: '', drag: null, multiSelectMode: false, trayOpen: false,
+  };
+}
+
+function runServer(name, ...args) {
+  return new Promise(function(resolve, reject) {
+    google.script.run.withSuccessHandler(resolve).withFailureHandler(function(err) {
+      reject(err && err.message ? err.message : err);
+    })[name](...args);
+  });
+}
+function setBusy(isBusy) { document.querySelectorAll('button').forEach(btn => btn.disabled = !!isBusy); updateHistoryButtons(); }
+function showError(err) { const el = document.getElementById('warnings'); el.textContent = String(err || 'エラーが発生しました。'); el.classList.remove('hidden'); }
+function showWarnings(warnings) { const el = document.getElementById('warnings'); if (warnings && warnings.length) { el.textContent = warnings.join('\n'); el.classList.remove('hidden'); } else { el.textContent = ''; el.classList.add('hidden'); } }
+
+
+function isTouchLike() {
+  return (navigator.maxTouchPoints || 0) > 0 || (window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches);
+}
+function isMobileLike() {
+  const narrow = window.matchMedia && window.matchMedia('(max-width: 880px)').matches;
+  const shortScreen = window.matchMedia && window.matchMedia('(max-height: 520px)').matches;
+  return !!(narrow || (isTouchLike() && shortScreen));
+}
+function updateDeviceClasses() {
+  const mobile = isMobileLike();
+  const landscape = mobile && window.innerWidth > window.innerHeight;
+  document.body.classList.toggle('mobile-ui', mobile);
+  document.body.classList.toggle('mobile-landscape', landscape);
+  document.body.classList.toggle('mobile-portrait', mobile && !landscape);
+  if (!mobile) closeMobileEditorMenu();
+}
+
+function debounce(fn, wait) { let t = null; return function(){ clearTimeout(t); const args = arguments; t = setTimeout(() => fn.apply(this, args), wait); }; }
+function initPartUI() {
+  renderPartPresetUI();
+  renderWebCountControls(defaultCountsForParts(PARTS));
+  renderPartOrderOptions(PARTS);
+  const stagger = document.getElementById('staggerMode');
+  if (stagger) stagger.value = state.staggerMode || 'even';
+  const tmpl = document.getElementById('layoutTemplate');
+  if (tmpl) tmpl.value = state.layoutTemplate || 'vertical';
+  updateLayoutTemplateDescription();
+  updateCustomTemplateUI();
+}
+function normalizePartClient(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  const compact = raw.replace(/[\s　]/g, '').toUpperCase();
+  const lower = compact.toLowerCase();
+  const alias = {
+    'SOP': 'S', 'SOPRANO': 'S', 'SOP.': 'S', 'ソプラノ': 'S',
+    'ALT': 'A', 'ALTO': 'A', 'ALT.': 'A', 'アルト': 'A',
+    'TEN': 'T', 'TENOR': 'T', 'TEN.': 'T', 'テナー': 'T', 'テノール': 'T',
+    'BAS': 'B', 'BASS': 'B', 'BASS.': 'B', 'BARITONE': 'B', 'バス': 'B', 'ベース': 'B',
+  };
+  return alias[compact] || alias[lower] || compact;
+}
+function normalizePartsList(parts) {
+  const seen = new Set();
+  const result = [];
+  (parts || []).forEach(function(part) {
+    const p = normalizePartClient(part);
+    if (p && !seen.has(p)) { seen.add(p); result.push(p); }
+  });
+  return result.length ? result : ['S', 'A', 'T', 'B'];
+}
+function parsePartsText(text) {
+  return normalizePartsList(String(text || '').split(/[、,\/\s]+/));
+}
+function setParts(parts, options) {
+  const normalized = normalizePartsList(parts);
+  PARTS = normalized;
+  PART_NAMES = {};
+  PARTS.forEach(function(part) { PART_NAMES[part] = part; });
+  if (!options || !options.skipState) {
+    state.parts = PARTS.slice();
+    state.partOrder = PARTS.slice();
+  }
+  renderPartPresetUI();
+  renderWebCountControls(preserveCountsForParts(state.counts || {}, PARTS));
+  renderPartOrderOptions((state.partOrder && state.partOrder.length) ? state.partOrder : PARTS);
+  updateCustomTemplateUI();
+}
+function renderPartPresetUI() {
+  const preset = document.getElementById('partPreset');
+  const customBox = document.getElementById('customPartsBox');
+  const customInput = document.getElementById('customPartsInput');
+  if (!preset) return;
+  const key = detectPresetKey(PARTS);
+  preset.value = key;
+  if (customBox) customBox.classList.toggle('hidden', key !== 'CUSTOM');
+  if (customInput && key === 'CUSTOM') customInput.value = PARTS.join(',');
+}
+function detectPresetKey(parts) {
+  const joined = normalizePartsList(parts).join(',');
+  for (const key in PART_PRESETS) {
+    if (PART_PRESETS[key].join(',') === joined) return key;
+  }
+  return 'CUSTOM';
+}
+function changePartPreset() {
+  const value = document.getElementById('partPreset').value;
+  if (value === 'CUSTOM') {
+    document.getElementById('customPartsBox').classList.remove('hidden');
+    return;
+  }
+  setParts(PART_PRESETS[value] || PART_PRESETS.SATB);
+  updateSummary();
+}
+function applyCustomParts() {
+  const parts = parsePartsText(document.getElementById('customPartsInput').value || '');
+  setParts(parts);
+  updateSummary();
+}
+function renderWebCountControls(counts) {
+  const box = document.getElementById('webCountControls');
+  if (!box) return;
+  box.innerHTML = PARTS.map(function(part) {
+    const id = 'webCount_' + part.replace(/[^A-Za-z0-9_-]/g, '_');
+    const val = Number(counts && counts[part] || 0);
+    return '<div class="count-stepper"><label for="' + escapeAttr(id) + '">' + escapeHtml(PART_NAMES[part] || part) + '</label><div class="count-control"><button type="button" class="small light" onclick="changeWebCount(\'' + escapeAttr(id) + '\',-1)">−</button><input id="' + escapeAttr(id) + '" data-part="' + escapeAttr(part) + '" type="text" inputmode="text" pattern="[0-9]*" value="' + val + '" oninput="sanitizeWebCountInput(this)" onblur="normalizeWebCountInput(this)"><button type="button" class="small light" onclick="changeWebCount(\'' + escapeAttr(id) + '\',1)">＋</button></div></div>';
+  }).join('');
+  setupWebCountInputs();
+}
+function setupWebCountInputs() {
+  document.querySelectorAll('#webCountControls input[data-part]').forEach(function(el) {
+    el.addEventListener('keydown', function(e) {
+      if (e.key === 'ArrowUp') { e.preventDefault(); changeWebCount(el.id, 1); }
+      if (e.key === 'ArrowDown') { e.preventDefault(); changeWebCount(el.id, -1); }
+    });
+  });
+}
+function renderPartOrderOptions(selectedParts) {
+  const select = document.getElementById('partOrder');
+  if (!select) return;
+  const parts = normalizePartsList(selectedParts && selectedParts.length ? selectedParts : PARTS);
+  const reversed = parts.slice().reverse();
+  const options = [parts, reversed];
+  if (parts.length === 4 && parts.join(',') === 'S,A,T,B') options.push(['S','A','B','T'], ['T','B','A','S']);
+  if (parts.length === 8 && parts.join(',') === 'S1,S2,A1,A2,T1,T2,B1,B2') options.push(['B2','B1','T2','T1','A2','A1','S2','S1']);
+  const seen = new Set();
+  select.innerHTML = options.filter(function(arr){ const k=arr.join(','); if(seen.has(k)) return false; seen.add(k); return true; }).map(function(arr) {
+    return '<option value="' + escapeAttr(arr.join(',')) + '">' + escapeHtml(arr.join(' - ')) + '</option>';
+  }).join('');
+  const current = (state.partOrder && state.partOrder.length ? state.partOrder : parts).join(',');
+  if ([...select.options].some(o => o.value === current)) select.value = current;
+  updateCustomTemplatePreview();
+}
+function defaultCountsForParts(parts) {
+  const c = {};
+  normalizePartsList(parts).forEach(function(part) { c[part] = ({ S: 18, A: 16, T: 8, B: 10 }[part] || 0); });
+  return c;
+}
+function preserveCountsForParts(counts, parts) {
+  const c = {};
+  normalizePartsList(parts).forEach(function(part) { c[part] = Number(counts && counts[part] || 0); });
+  return c;
+}
+function inferPartsFromCounts(counts) {
+  const keys = Object.keys(counts || {}).filter(function(k) { return k && Number(counts[k] || 0) >= 0; });
+  return keys.length ? normalizePartsList(keys) : PARTS.slice();
+}
+function inferPartsFromMembers(members) {
+  const parts = [];
+  (members || []).forEach(function(m) { if (m && m.part) parts.push(m.part); });
+  return normalizePartsList(parts.length ? parts : PARTS);
+}
+function inferPartsFromLayoutData(data) {
+  const parts = [];
+  if (data) {
+    if (data.parts && data.parts.length) parts.push(...data.parts);
+    if (data.partOrder && data.partOrder.length) parts.push(...data.partOrder);
+    (data.rows || []).forEach(row => (row.seats || []).forEach(seat => { if (seat && !seat.empty && seat.part) parts.push(seat.part); }));
+    (data.unplaced || []).forEach(seat => { if (seat && !seat.empty && seat.part) parts.push(seat.part); });
+    Object.keys(data.counts || {}).forEach(k => parts.push(k));
+  }
+  return normalizePartsList(parts.length ? parts : PARTS);
+}
+function setPartsFromData(data) {
+  const parts = inferPartsFromLayoutData(data);
+  setParts(parts, { skipState: true });
+  if (state) {
+    state.parts = parts.slice();
+    state.partOrder = normalizePartsList((data && data.partOrder) || parts);
+  }
+}
+function sanitizeWebCountInput(input) {
+  const before = input.value;
+  const cleaned = String(before).replace(/[^0-9]/g, '');
+  if (before !== cleaned) input.value = cleaned;
+}
+function normalizeWebCountInput(input) {
+  const n = Math.max(0, Math.floor(Number(String(input.value).replace(/[^0-9]/g, '') || 0)));
+  input.value = String(n);
+}
+function changeWebCount(id, delta) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const n = Math.max(0, Math.floor(Number(String(el.value).replace(/[^0-9]/g, '') || 0) + delta));
+  el.value = String(n);
+}
+function toggleMobileEditorMenu(event) {
+  if (event) { event.preventDefault(); event.stopPropagation(); }
+  const bar = document.querySelector('.editor-toolbar');
+  if (!bar) return;
+  mobileToolbarOpen = !bar.classList.contains('mobile-editor-menu-open');
+  bar.classList.toggle('mobile-editor-menu-open', mobileToolbarOpen);
+}
+function closeMobileEditorMenu() {
+  const bar = document.querySelector('.editor-toolbar');
+  if (bar) bar.classList.remove('mobile-editor-menu-open');
+  mobileToolbarOpen = false;
+}
+
+
+function openInputMembersSheet() {
+  const area = document.getElementById('memberPasteText');
+  if (area) {
+    area.focus();
+    area.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+function loadMembersFileButton() {
+  const input = document.getElementById('memberCsvFile');
+  if (input) input.click();
+}
+function loadMembersFileAsNew(event) {
+  const file = event && event.target && event.target.files && event.target.files[0];
+  if (!file) return;
+  readTextFile(file).then(function(text) {
+    const area = document.getElementById('memberPasteText');
+    if (area) area.value = text;
+    loadMembersAsNew();
+  }).catch(showError).finally(function() { if (event.target) event.target.value = ''; });
+}
+function loadMembersAsNew() {
+  const text = (document.getElementById('memberPasteText') || {}).value || '';
+  const res = parseMembersText(text);
+  const members = res.members || [];
+  if (!members.length) {
+    alert('名簿を貼り付けるか、CSV/TSVファイルを選択してください。\n形式例: 氏名,パート または 氏名\tパート');
+    showWarnings(res.warnings || []);
+    return;
+  }
+  const parts = res.parts && res.parts.length ? res.parts : inferPartsFromMembers(members);
+  setParts(parts);
+  state = freshState();
+  state.parts = parts.slice();
+  state.partOrder = parts.slice();
+  state.sourceMode = 'members-local';
+  state.members = members;
+  state.counts = res.counts || countMembers(members);
+  renderWebCountControls(preserveCountsForParts(state.counts, PARTS));
+  renderPartOrderOptions(state.partOrder);
+  document.getElementById('layoutTitle').value = document.getElementById('layoutTitle').value || '名簿から作成した配置';
+  showWarnings(res.warnings || []);
+  updateSummary();
+  generateCandidates();
+}
+function loadCountsAsNew() {
+  loadWebCountsAsNew();
+}
+function loadWebCountsAsNew() {
+  const counts = readWebCounts();
+  if (totalCounts(counts) <= 0) { alert('人数を1名以上入力してください。'); return; }
+  const parts = PARTS.slice();
+  state = freshState();
+  state.parts = parts.slice();
+  state.partOrder = getPartOrder();
+  state.sourceMode = 'web-counts'; state.counts = counts; state.members = createPlaceholderMembers(counts);
+  document.getElementById('layoutTitle').value = document.getElementById('layoutTitle').value || '人数だけで作成した配置';
+  showWarnings([]); updateSummary(); generateCandidates();
+}
+function readWebCounts() {
+  const counts = emptyCounts();
+  document.querySelectorAll('#webCountControls input[data-part]').forEach(function(el) {
+    const part = normalizePartClient(el.getAttribute('data-part'));
+    counts[part] = Math.max(0, Math.floor(Number(String(el.value || '').replace(/[^0-9]/g, '') || 0)));
+  });
+  return counts;
+}
+function readWebCount(id) { const n = Number(document.getElementById(id).value || 0); return Math.max(0, Math.floor(n)); }
+function syncWebCountsFromCounts(c) { renderWebCountControls(preserveCountsForParts(c || {}, PARTS)); }
+function createPlaceholderMembers(counts) {
+  const members = [];
+  PARTS.forEach(function(part) {
+    for (let i = 1; i <= (Number(counts[part]) || 0); i++) members.push({ id: part + pad2(i), label: part + pad2(i), name: '', part, order: i, memo: '' });
+  });
+  return members;
+}
+function applyNamesToCurrentLayout() {
+  alert('公開版では「名前入力CSVを保存」→ CSVに氏名を入力 →「名前CSVを反映」を使ってください。');
+}
+function parseMembersText(text) {
+  const warnings = [];
+  const rows = parseTableText(text || '');
+  const members = [];
+  if (!rows.length) return { members, counts: emptyCounts(), parts: PARTS.slice(), total: 0, warnings: ['名簿が空です。'] };
+  let startIndex = 0;
+  let nameIdx = 0, partIdx = 1, orderIdx = 2, memoIdx = 3;
+  const header = rows[0].map(v => String(v || '').trim().toLowerCase());
+  const hasHeader = header.some(v => ['氏名','名前','name','member','メンバー'].includes(v)) || header.some(v => ['パート','part','voice','声部'].includes(v));
+  if (hasHeader) {
+    startIndex = 1;
+    const findIndex = names => header.findIndex(v => names.includes(v));
+    const ni = findIndex(['氏名','名前','name','member','メンバー']); if (ni >= 0) nameIdx = ni;
+    const pi = findIndex(['パート','part','voice','声部']); if (pi >= 0) partIdx = pi;
+    const oi = findIndex(['並び順','順番','order','no','番号']); if (oi >= 0) orderIdx = oi;
+    const mi = findIndex(['メモ','memo','note','備考']); if (mi >= 0) memoIdx = mi;
+  }
+  const perPartNo = {};
+  for (let r = startIndex; r < rows.length; r++) {
+    const row = rows[r];
+    const name = String(row[nameIdx] || '').trim();
+    const part = normalizePartClient(row[partIdx]);
+    const orderRaw = row[orderIdx];
+    const memo = String(row[memoIdx] || '').trim();
+    if (!name && !part) continue;
+    if (!name) { warnings.push((r + 1) + '行目: 氏名が空のため読み飛ばしました。'); continue; }
+    if (!part) { warnings.push((r + 1) + '行目: パートが空のため読み飛ばしました。'); continue; }
+    perPartNo[part] = (Number(perPartNo[part]) || 0) + 1;
+    members.push({ id: part + pad2(perPartNo[part]), label: part + pad2(perPartNo[part]), name, part, order: Number(orderRaw) || perPartNo[part], memo, sourceRow: r + 1 });
+  }
+  members.sort(function(a, b) {
+    const ai = normalizePartsList([a.part])[0], bi = normalizePartsList([b.part])[0];
+    const partDiff = normalizePartsList(Object.keys(perPartNo)).indexOf(ai) - normalizePartsList(Object.keys(perPartNo)).indexOf(bi);
+    if (partDiff !== 0) return partDiff;
+    return (a.order || 9999) - (b.order || 9999);
+  });
+  const counts = countMembers(members);
+  return { members, counts, parts: inferPartsFromMembers(members), total: sumObjectCounts(counts), warnings };
+}
+function parseTableText(text) {
+  const lines = String(text || '').replace(/^\uFEFF/, '').split(/\r?\n/).filter(line => line.trim() !== '');
+  return lines.map(function(line) {
+    if (line.indexOf('\t') >= 0) return line.split('\t').map(v => v.trim());
+    return splitCsvLine(line).map(v => v.trim());
+  });
+}
+function splitCsvLine(line) {
+  const out = [];
+  let cur = '', q = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (q && line[i + 1] === '"') { cur += '"'; i++; }
+      else q = !q;
+    } else if ((ch === ',' || ch === '，') && !q) {
+      out.push(cur); cur = '';
+    } else cur += ch;
+  }
+  out.push(cur);
+  return out;
+}
+function sumObjectCounts(c) { return Object.keys(c || {}).reduce((sum, k) => sum + Number(c[k] || 0), 0); }
+function readTextFile(file) {
+  return new Promise(function(resolve, reject) {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject('ファイルを読み込めませんでした。');
+    reader.readAsText(file, 'UTF-8');
+  });
+}
+
+
+function updateSummary() {
+  const c = state.counts || emptyCounts(); const total = totalCounts(c);
+  const sourceText = state.sourceMode ? '読み込み元: ' + sourceModeLabel(state.sourceMode) : 'まだ読み込んでいません。';
+  document.getElementById('sourceSummary').innerHTML = '<div>' + escapeHtml(sourceText) + '</div>' +
+    '<div class="counts">' + orderedPartsForCounts(c).map(function(part){ return countBox(part, c[part]); }).join('') + countBox('計', total) + '</div>';
+}
+function sourceModeLabel(mode) { return { members: '名簿から新規配置', 'members-local': '貼り付け名簿から新規配置', counts: '人数入力', 'web-counts': '人数だけで作成', 'members-applied': '名簿を割り当て', 'name-csv-applied': '名前CSVを反映', saved: '保存済み配置', 'saved-local': 'このブラウザの保存済み配置', 'layout-file': '配置ファイル' }[mode] || mode; }
+function countBox(label, value) { return '<div class="count-box"><span>' + escapeHtml(label) + '</span><strong>' + Number(value || 0) + '</strong></div>'; }
+function selectedRowCounts() {
+  const values = Array.from(document.querySelectorAll('input[name="rows"]:checked')).map(el => Number(el.value)).filter(Boolean);
+  const unique = Array.from(new Set(values)).filter(v => v >= 1).sort((a, b) => a - b);
+  return unique.length ? unique : [4];
+}
+function getLayoutTemplateKey() {
+  const el = document.getElementById('layoutTemplate');
+  return el ? (el.value || 'vertical') : (state.layoutTemplate || 'vertical');
+}
+function layoutTemplateName(key) { return (LAYOUT_TEMPLATES.find(t => t.key === key) || LAYOUT_TEMPLATES[0]).name; }
+function layoutTemplateDesc(key) { return (LAYOUT_TEMPLATES.find(t => t.key === key) || LAYOUT_TEMPLATES[0]).desc; }
+function updateLayoutTemplateDescription() {
+  const box = document.getElementById('layoutTemplateDesc');
+  if (box) box.textContent = layoutTemplateDesc(getLayoutTemplateKey());
+  updateCustomTemplateUI();
+}
+function setLayoutTemplateFromInput() {
+  state.layoutTemplate = getLayoutTemplateKey();
+  if (state.layoutTemplate === 'custom' && !getCustomTemplateText()) resetCustomTemplateText(false);
+  updateLayoutTemplateDescription();
+}
+function getCustomTemplateText() {
+  const el = document.getElementById('customTemplateText');
+  return String((el && el.value) || state.customTemplateText || '').trim();
+}
+function setCustomTemplateFromInput() {
+  state.customTemplateText = getCustomTemplateText();
+  updateCustomTemplatePreview();
+}
+function defaultCustomTemplateText() {
+  const order = getPartOrder ? getPartOrder() : (PARTS || []);
+  const female = femaleParts(order);
+  const male = maleParts(order);
+  const front = (female.length ? female : order).join(',');
+  const rear = (male.length ? male : order).join(',');
+  return '後列:' + rear + '\n中列:' + order.join(',') + '\n前列:' + front;
+}
+function resetCustomTemplateText(showMessage) {
+  const text = defaultCustomTemplateText();
+  state.customTemplateText = text;
+  const el = document.getElementById('customTemplateText');
+  if (el) el.value = text;
+  updateCustomTemplatePreview();
+  if (showMessage !== false) showWarnings(['カスタムテンプレートを現在のパート構成で初期化しました。']);
+}
+function updateCustomTemplateUI() {
+  const box = document.getElementById('customTemplateBox');
+  const el = document.getElementById('customTemplateText');
+  const isCustom = getLayoutTemplateKey() === 'custom';
+  if (box) box.classList.toggle('hidden', !isCustom);
+  if (isCustom && el && !String(el.value || '').trim()) el.value = state.customTemplateText || defaultCustomTemplateText();
+  if (isCustom) updateCustomTemplatePreview();
+}
+function parseTemplatePartLine(line, partOrder) {
+  let text = String(line || '').trim();
+  if (!text) return [];
+  text = text.replace(/^\s*[-・*]\s*/, '');
+  const colon = Math.max(text.indexOf(':'), text.indexOf('：'));
+  if (colon >= 0) text = text.slice(colon + 1);
+  const known = new Set(normalizePartsList(partOrder || PARTS));
+  const parsed = normalizePartsList(text.split(/[、,\/\s]+/));
+  return parsed.filter(function(part) { return known.has(part); });
+}
+function parseCustomTemplateRows(partOrder) {
+  const order = normalizePartsList(partOrder || PARTS);
+  const text = getCustomTemplateText() || defaultCustomTemplateText();
+  const lines = text.split(/\r?\n/).map(function(line) { return line.trim(); }).filter(function(line) { return line && !/^#/.test(line); });
+  const visualRows = lines.map(function(line) { return parseTemplatePartLine(line, order); }).filter(function(parts) { return parts.length; });
+  if (!visualRows.length) return [order.slice()];
+  // 入力は見た目どおり「後列→前列」。内部データは「前列→後列」なので反転して扱います。
+  return visualRows.reverse();
+}
+function customTemplateRowsForCount(rowCount, partOrder) {
+  const base = parseCustomTemplateRows(partOrder);
+  if (rowCount <= 0) return [];
+  if (base.length === rowCount) return base.map(function(row){ return row.slice(); });
+  if (base.length === 1) return Array.from({ length: rowCount }, function(){ return base[0].slice(); });
+  return Array.from({ length: rowCount }, function(_, r) {
+    const idx = rowCount === 1 ? 0 : Math.round(r * (base.length - 1) / (rowCount - 1));
+    return (base[idx] || base[0]).slice();
+  });
+}
+function updateCustomTemplatePreview() {
+  const box = document.getElementById('customTemplatePreview');
+  if (!box) return;
+  if (getLayoutTemplateKey() !== 'custom') { box.textContent = ''; return; }
+  const selected = selectedRowCounts ? selectedRowCounts() : [3];
+  const rowCount = selected && selected.length ? selected[0] : 3;
+  const rows = customTemplateRowsForCount(rowCount, getPartOrder());
+  box.textContent = rowCount + '列での解釈例\n' + rows.slice().reverse().map(function(parts, idx) {
+    const rowNo = rowCount - idx;
+    return rowLabel(rowNo, rowCount) + ': ' + parts.join(', ');
+  }).join('\n');
+}
+function partGroup(part) {
+  const p = String(part || '').toUpperCase();
+  const m = p.match(/^([SATB])/);
+  return m ? m[1] : 'OTHER';
+}
+function femaleParts(partOrder) { return (partOrder || PARTS).filter(p => ['S','A'].includes(partGroup(p))); }
+function maleParts(partOrder) { return (partOrder || PARTS).filter(p => ['T','B'].includes(partGroup(p))); }
+function otherParts(partOrder) { return (partOrder || PARTS).filter(p => !['S','A','T','B'].includes(partGroup(p))); }
+function rowsForPartByTemplate(part, rowCount, templateKey, partOrder) {
+  const all = Array.from({ length: rowCount }, (_, i) => i);
+  if (templateKey === 'custom') {
+    const customRows = customTemplateRowsForCount(rowCount, partOrder || PARTS);
+    const eligible = [];
+    customRows.forEach(function(rowParts, idx) { if ((rowParts || []).includes(part)) eligible.push(idx); });
+    return eligible.length ? eligible : all;
+  }
+  if (templateKey !== 'femaleFrontMaleRear') return all;
+  const group = partGroup(part);
+  if (group === 'S' || group === 'A') {
+    const end = Math.ceil(rowCount / 2) - 1;
+    return all.filter(r => r <= end || (rowCount % 2 === 1 && r === Math.floor(rowCount / 2)));
+  }
+  if (group === 'T' || group === 'B') {
+    const start = Math.floor(rowCount / 2);
+    return all.filter(r => r >= start);
+  }
+  return all;
+}
+function orderForTemplate(partOrder, templateKey) {
+  const order = normalizePartsList(partOrder || PARTS);
+  if (templateKey === 'maleCenterFemaleSides') {
+    return normalizePartsList([
+      ...order.filter(p => partGroup(p) === 'S'),
+      ...order.filter(p => partGroup(p) === 'T'),
+      ...order.filter(p => partGroup(p) === 'B'),
+      ...order.filter(p => partGroup(p) === 'A'),
+      ...otherParts(order),
+    ]);
+  }
+  return order;
+}
+function rowOrderForTemplate(rowIndex, rowCount, partOrder, templateKey) {
+  const order = orderForTemplate(partOrder, templateKey);
+  if (templateKey !== 'custom') return order;
+  const rowParts = customTemplateRowsForCount(rowCount, order)[rowIndex] || order;
+  const seen = new Set();
+  const result = [];
+  rowParts.concat(order).forEach(function(part) {
+    const p = normalizePartClient(part);
+    if (p && !seen.has(p)) { seen.add(p); result.push(p); }
+  });
+  return result.length ? result : order;
+}
+function getPartOrder() { const v = document.getElementById('partOrder').value; return normalizePartsList(v ? v.split(',') : PARTS); }
+function getStaggerMode() { const el = document.getElementById('staggerMode'); return el ? (el.value || 'none') : (state.staggerMode || 'none'); }
+function setStaggerModeFromInput() { state.staggerMode = getStaggerMode(); if (state.rows && state.rows.length) { commitHistory(); renderStage(); } }
+
+function generateCandidates() {
+  if (!state.members || !state.members.length) { alert('左の2パターンから名簿または人数を読み込んでください。'); return; }
+  state.partOrder = getPartOrder(); state.parts = PARTS.slice(); state.staggerMode = getStaggerMode(); state.layoutTemplate = getLayoutTemplateKey(); state.customTemplateText = getCustomTemplateText(); candidates = [];
+  selectedRowCounts().forEach(rowCount => STRATEGIES.forEach(strategy => candidates.push(buildCandidate(rowCount, strategy.key, state.layoutTemplate))));
+  renderCandidates(); showTab('candidates');
+}
+function buildCandidate(rowCount, strategy, templateKey) {
+  const counts = state.counts || countMembers(state.members);
+  const partOrder = getPartOrder();
+  const allocation = buildAllocation(counts, rowCount, strategy, partOrder, templateKey);
+  const rows = buildRowsFromAllocation(allocation, rowCount, partOrder, state.members, templateKey);
+  return { id: 'C' + Date.now() + '_' + Math.random().toString(36).slice(2), rowCount, strategy, template: templateKey || 'vertical', strategyName: strategyName(strategy), templateName: layoutTemplateName(templateKey), rows, allocation, counts, parts: PARTS.slice(), partOrder: partOrder.slice(), staggerMode: state.staggerMode || 'none', customTemplateText: state.customTemplateText || getCustomTemplateText() };
+}
+function buildAllocation(counts, rowCount, strategy, partOrder, templateKey) {
+  const allocation = {}; const totals = Array(rowCount).fill(0);
+  partOrder.forEach(function(part) {
+    const count = Number(counts[part]) || 0;
+    allocation[part] = Array(rowCount).fill(0);
+    const eligible = rowsForPartByTemplate(part, rowCount, templateKey, partOrder);
+    const targetRows = eligible.length ? eligible : Array.from({ length: rowCount }, (_, i) => i);
+    const base = Math.floor(count / targetRows.length);
+    const rem = count % targetRows.length;
+    targetRows.forEach(function(r) { allocation[part][r] += base; totals[r] += base; });
+    const pref = preferenceRows(part, rowCount, strategy).filter(r => targetRows.includes(r));
+    const prefRows = pref.length ? pref : targetRows;
+    const used = {};
+    for (let i = 0; i < rem; i++) {
+      let chosen = prefRows[0];
+      if (strategy === 'balanced') {
+        let bestScore = Infinity;
+        prefRows.forEach(function(r) { const score = totals[r] + (used[r] ? 1000 : 0); if (score < bestScore) { bestScore = score; chosen = r; } });
+      } else { chosen = prefRows.find(r => !used[r]); if (chosen === undefined) chosen = prefRows[i % prefRows.length]; }
+      allocation[part][chosen] += 1; totals[chosen] += 1; used[chosen] = true;
+    }
+  });
+  return allocation;
+}
+function preferenceRows(part, rowCount, strategy) {
+  const front = [...Array(rowCount).keys()]; const rear = [...front].reverse();
+  if (strategy === 'front') return front; if (strategy === 'rear') return rear;
+  const base = partGroup(part);
+  if (base === 'S') return rear; if (base === 'B') return front;
+  const target = base === 'A' ? Math.round((rowCount - 1) * 0.58) : Math.round((rowCount - 1) * 0.42);
+  return [...front].sort((a, b) => Math.abs(a - target) - Math.abs(b - target) || a - b);
+}
+function buildRowsFromAllocation(allocation, rowCount, partOrder, members, templateKey) {
+  const pools = {}; const usedIndex = {};
+  partOrder.forEach(part => { pools[part] = (members || []).filter(m => m.part === part).sort((a, b) => (Number(a.order) || 9999) - (Number(b.order) || 9999)); usedIndex[part] = 0; });
+  const rows = [];
+  for (let r = 0; r < rowCount; r++) {
+    const row = { rowNo: r + 1, seats: [] };
+    const effectiveOrder = rowOrderForTemplate(r, rowCount, partOrder, templateKey);
+    if (templateKey === 'mixed') {
+      const remaining = {}; let rowTotal = 0;
+      effectiveOrder.forEach(function(part) { remaining[part] = allocation[part] ? Number(allocation[part][r] || 0) : 0; rowTotal += remaining[part]; });
+      while (rowTotal > 0) {
+        let progressed = false;
+        effectiveOrder.forEach(function(part) {
+          if (remaining[part] > 0) {
+            row.seats.push(nextSeatForPart(part, pools, usedIndex));
+            remaining[part] -= 1; rowTotal -= 1; progressed = true;
+          }
+        });
+        if (!progressed) break;
+      }
+    } else {
+      effectiveOrder.forEach(function(part) {
+        const n = allocation[part] ? allocation[part][r] : 0;
+        for (let i = 0; i < n; i++) row.seats.push(nextSeatForPart(part, pools, usedIndex));
+      });
+    }
+    rows.push(row);
+  }
+  return rows;
+}
+function nextSeatForPart(part, pools, usedIndex) {
+  const member = pools[part] && pools[part][usedIndex[part]] || null;
+  usedIndex[part] = (Number(usedIndex[part]) || 0) + 1;
+  const label = part + pad2(usedIndex[part]);
+  return { id: newSeatId(part), part, label: member && member.label ? member.label : label, name: member && member.name ? member.name : '', empty: false };
+}
+function renderCandidates() {
+  const grid = document.getElementById('candidateGrid'); grid.innerHTML = '';
+  if (!candidates.length) { grid.innerHTML = '<p class="muted">候補はまだありません。</p>'; return; }
+  candidates.forEach(function(cand, idx) {
+    const div = document.createElement('div'); div.className = 'candidate';
+    div.innerHTML = '<h3>候補' + (idx + 1) + '：' + cand.rowCount + '列・' + escapeHtml(cand.templateName || layoutTemplateName(cand.template)) + '・' + escapeHtml(cand.strategyName) + '</h3>' +
+      '<div class="muted">' + escapeHtml(layoutTemplateDesc(cand.template)) + ' / ' + escapeHtml(strategyDesc(cand.strategy)) + '</div>' + candidateTableHtml(cand) +
+      '<button onclick="openCandidate(\'' + cand.id + '\')">この案を編集</button>';
+    grid.appendChild(div);
+  });
+}
+function candidateTableHtml(cand) {
+  const parts = (cand.partOrder && cand.partOrder.length ? cand.partOrder : PARTS);
+  let html = '<table class="candidate-table"><thead><tr><th>列</th>' + parts.map(p => '<th>' + escapeHtml(p) + '</th>').join('') + '<th>計</th></tr></thead><tbody>';
+  cand.rows.slice().reverse().forEach(function(row) {
+    const c = countSeats(row.seats);
+    html += '<tr><td>' + escapeHtml(rowLabel(row.rowNo, cand.rows.length)) + '</td>' + parts.map(p => '<td>' + Number(c[p] || 0) + '</td>').join('') + '<td><strong>' + totalCounts(c) + '</strong></td></tr>';
+  });
+  return html + '</tbody></table>';
+}
+function openCandidate(candidateId) {
+  const cand = candidates.find(c => c.id === candidateId); if (!cand) return;
+  if (state.rows && state.rows.length) {
+    saveDraftNow('before-new-candidate');
+    const ok = confirm('現在編集中の配置があります。現在の内容は下書きとして残ります。別の候補を開きますか？');
+    if (!ok) return;
+  }
+  state.layout_id = ''; state.title = document.getElementById('layoutTitle').value || cand.rowCount + '列・' + (cand.templateName || layoutTemplateName(cand.template)) + '・' + cand.strategyName;
+  state.rows = deepCopy(cand.rows); ensureSeatIds(); state.unplaced = []; state.rowCount = cand.rowCount; state.parts = (cand.parts || PARTS).slice(); state.partOrder = (cand.partOrder || getPartOrder()).slice(); state.staggerMode = getStaggerMode(); state.layoutTemplate = cand.template || getLayoutTemplateKey(); state.customTemplateText = cand.customTemplateText || getCustomTemplateText(); const cti = document.getElementById('customTemplateText'); if (cti) cti.value = state.customTemplateText || ''; state.counts = countFromRows(state.rows); state.selectedIds = [];
+  syncEditorTitleInput(); document.getElementById('layoutTitle').value = state.title; updateSummary(); mobileView.fitDone = false; renderStage(); resetHistory(); saveDraftNow('open-candidate'); showTab('editor');
+}
+
+function partColor(part) {
+  if (!part) return '#ffffff';
+  const idx = Math.max(0, PARTS.indexOf(part));
+  return PART_COLOR_PALETTE[idx % PART_COLOR_PALETTE.length];
+}
+function partTextColor(part) { return '#1f2937'; }
+function rowStaggerShiftPx(rowNo) {
+  const mode = state.staggerMode || getStaggerMode();
+  if (mode === 'none') return 0;
+  const isOdd = Number(rowNo) % 2 === 1;
+  const shouldShift = (mode === 'odd' && isOdd) || (mode === 'even' && !isOdd);
+  return shouldShift ? 40 : 0;
+}
+
+function renderStage() {
+  const container = document.getElementById('stageContainer');
+  if (!state.rows || !state.rows.length) { container.innerHTML = '<p class="muted">候補を選ぶと、ここに配置図が表示されます。</p>'; return; }
+  ensureSeatIds(); state.unplaced = state.unplaced || [];
+  const title = getCurrentTitle(); const placedCounts = countFromRows(state.rows); const unplacedCounts = countSeats(state.unplaced); const allCounts = addCounts(placedCounts, unplacedCounts);
+  state.counts = allCounts; updateSummary(); syncEditorTitleInput(); updateHistoryButtons(); updateMultiSelectButton();
+  let html = '<div class="stage-inner"><div class="stage-title"><div><h2>' + escapeHtml(title) + '</h2>' +
+    '<div class="muted">配置中: ' + escapeHtml(countsText(placedCounts)) + '</div>' +
+    (state.unplaced.length ? '<div class="muted">未配置: ' + escapeHtml(countsText(unplacedCounts)) + '</div>' : '') +
+    (state.selectedIds.length ? '<div class="muted">選択中: ' + state.selectedIds.length + '枚</div>' : '') +
+    '</div><div class="legend">' + PARTS.map(function(part){ return '<span style="background:' + partColor(part) + '">' + escapeHtml(part) + '</span>'; }).join('') + '</div></div>' +
+    '<div class="stage-note no-print">PCはドラッグで差し込み移動・範囲選択、ダブルクリックで編集。スマホは通常ドラッグでキャンバス移動、長押しドラッグでカード移動、ダブルタップで編集できます。</div><div class="stage">';
+  state.rows.slice().reverse().forEach(function(row) {
+    const realRowIndex = row.rowNo - 1; const rowCounts = countSeats(row.seats);
+    html += '<div class="stage-row-block"><div class="row-label">' + escapeHtml(rowLabel(row.rowNo, state.rows.length)) + '　' + row.seats.length + '枠 / ' + totalCounts(rowCounts) + '名　' + escapeHtml(shortCountsText(rowCounts)) + '</div>';
+    const rowShift = rowStaggerShiftPx(row.rowNo);
+    html += '<div class="stage-row ' + (rowShift ? 'staggered' : '') + '" style="--row-shift:' + rowShift + 'px" data-row="' + realRowIndex + '" oncontextmenu="openRowMenu(event,' + realRowIndex + ',' + row.seats.length + ')" ondragover="rowDragOver(event)" ondragleave="rowDragLeave(event)">';
+    html += '<button class="small light square row-plus no-print" title="先頭に追加" onclick="addSeatMenuFromButton(event,' + realRowIndex + ',0)">＋</button>';
+    html += insertZoneHtml(realRowIndex, 0);
+    row.seats.forEach(function(seat, seatIndex) { html += seatHtml(seat, 'row', realRowIndex, seatIndex); html += insertZoneHtml(realRowIndex, seatIndex + 1); });
+    html += '<button class="small light square row-plus no-print" title="末尾に追加" onclick="addSeatMenuFromButton(event,' + realRowIndex + ',' + row.seats.length + ')">＋</button>';
+    html += '</div></div>';
+  });
+  html += '<div class="conductor">指揮者</div></div>' + trayHtml() + '</div>';
+  container.innerHTML = html + zoomPillHtml();
+  afterRenderStage();
+}
+function insertZoneHtml(rowIndex, insertIndex) {
+  return '<div class="insert-zone no-print" title="ここに差し込み" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropToRowAt(event,' + rowIndex + ',' + insertIndex + ')" oncontextmenu="openRowMenu(event,' + rowIndex + ',' + insertIndex + ')" onpointerdown="startLongPress(event, function(ev){ openRowMenu(ev,' + rowIndex + ',' + insertIndex + '); })" onpointerup="cancelLongPress()" onpointercancel="cancelLongPress()"></div>';
+}
+function seatHtml(seat, sourceType, rowIndex, seatIndex) {
+  const classes = ['seat']; if (seat.empty) classes.push('empty'); if (sourceType === 'tray') classes.push('tray-seat'); if (state.selectedIds.includes(seat.id)) classes.push('selected');
+  let nameText = ''; if (seat.empty) nameText = '空席'; else if (state.displayMode === 'part') nameText = PART_NAMES[seat.part] || seat.part; else if (state.displayMode === 'label') nameText = seat.label || seat.part; else nameText = seat.name || seat.label || seat.part;
+  const style = seat.empty ? '' : ' style="background:' + partColor(seat.part) + ';color:' + partTextColor(seat.part) + '"';
+  return '<div class="' + classes.join(' ') + '"' + style + ' draggable="true" data-seat-id="' + escapeHtml(seat.id) + '" ' +
+    'onclick="seatClick(event,\'' + seat.id + '\')" ondblclick="seatDoubleClick(event,\'' + seat.id + '\')" ' +
+    'oncontextmenu="openSeatMenu(event,\'' + seat.id + '\')" ' +
+    'onpointerdown="seatPointerDown(event,\'' + seat.id + '\')" onpointerup="seatPointerUp(event)" onpointercancel="seatPointerCancel(event)" ' +
+    'ondragstart="dragSeatStart(event,\'' + seat.id + '\')" ondragend="dragEnd()">' +
+    '<div class="seat-part">' + escapeHtml(seat.empty ? '-' : seat.part) + '</div><div class="seat-name">' + escapeHtml(nameText) + '</div>' +
+    (state.displayMode === 'name' && seat.name && seat.label ? '<div class="seat-label">' + escapeHtml(seat.label) + '</div>' : '') + '</div>';
+}
+function trayHtml() {
+  const trayCounts = countSeats(state.unplaced || []);
+  let html = '<div class="tray-wrap no-print ' + (state.trayOpen ? 'open' : '') + '"><button type="button" class="tray-toggle" onclick="toggleTrayOpen()">未配置 ' + state.unplaced.length + '枚 ' + (state.trayOpen ? '▼' : '▲') + '</button><div class="tray-head"><div><div class="tray-title">未配置トレイ / 追加パレット</div>' +
+    '<div class="muted">＋ボタンでカードを作成、またはチップをドラッグして任意の段へ差し込めます。不要なカードはゴミ箱へ。</div></div>' +
+    '<div class="muted">' + state.unplaced.length + '枚 / ' + escapeHtml(shortCountsText(trayCounts)) + '</div></div>';
+  html += '<div class="palette">' + PARTS.map(paletteChip).join('') + paletteChip('empty') +
+    '<div class="trash-drop" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropToTrash(event)">🗑 削除</div></div>';
+  html += '<div class="tray-list" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropToTray(event)">';
+  if (!state.unplaced.length) html += '<div class="muted">未配置カードはありません。</div>';
+  state.unplaced.forEach(function(seat, idx) { html += insertZoneTrayHtml(idx) + seatHtml(seat, 'tray', -1, idx); });
+  html += insertZoneTrayHtml(state.unplaced.length);
+  html += '</div></div>';
+  return html;
+}
+
+function toggleTrayOpen() {
+  state.trayOpen = !state.trayOpen;
+  renderStage();
+}
+function zoomPillHtml() {
+  return '<div class="zoom-pill no-print"><button class="small light" onclick="zoomStageBy(0.9)">−</button><span id="zoomLabel">100%</span><button class="small light" onclick="zoomStageBy(1.1)">＋</button><button class="small ghost" onclick="fitStageToScreen(true)">全体</button></div>';
+}
+function afterRenderStage() {
+  const wrap = document.getElementById('stageContainer');
+  if (!wrap) return;
+  wrap.classList.toggle('touch-canvas', isMobileLike());
+  const inner = wrap.querySelector('.stage-inner');
+  if (inner) inner.classList.toggle('zoomed', isMobileLike());
+  if (isMobileLike()) {
+    if (!mobileView.fitDone) setTimeout(function(){ fitStageToScreen(true); }, 30);
+    else applyStageTransform();
+  } else {
+    mobileView.zoom = 1; mobileView.panX = 0; mobileView.panY = 0; mobileView.fitDone = false;
+    applyStageTransform();
+  }
+  markMobileDragSources();
+}
+function applyStageTransform() {
+  const wrap = document.getElementById('stageContainer');
+  const inner = wrap ? wrap.querySelector('.stage-inner') : null;
+  if (!inner) return;
+  if (isMobileLike()) {
+    inner.style.transform = 'translate(' + mobileView.panX + 'px,' + mobileView.panY + 'px) scale(' + mobileView.zoom + ')';
+  } else {
+    inner.style.transform = '';
+  }
+  updateZoomLabel();
+}
+function updateZoomLabel() {
+  const el = document.getElementById('zoomLabel');
+  if (el) el.textContent = Math.round((mobileView.zoom || 1) * 100) + '%';
+}
+function fitStageToScreen(force) {
+  if (!isMobileLike()) return;
+  const wrap = document.getElementById('stageContainer');
+  const inner = wrap ? wrap.querySelector('.stage-inner') : null;
+  if (!wrap || !inner) return;
+  inner.style.transform = '';
+  const contentW = Math.max(inner.scrollWidth, inner.offsetWidth, 1);
+  const contentH = Math.max(inner.scrollHeight, inner.offsetHeight, 1);
+  const wrapW = Math.max(wrap.clientWidth, 1);
+  const wrapH = Math.max(wrap.clientHeight, 1);
+  const fit = Math.max(0.35, Math.min(1.05, Math.min((wrapW - 18) / contentW, (wrapH - 18) / contentH)));
+  mobileView.zoom = fit;
+  mobileView.panX = Math.max(8, (wrapW - contentW * fit) / 2);
+  mobileView.panY = Math.max(8, (wrapH - contentH * fit) / 2);
+  mobileView.fitDone = true;
+  applyStageTransform();
+}
+function zoomStageBy(factor) {
+  const wrap = document.getElementById('stageContainer');
+  if (!wrap) return;
+  const rect = wrap.getBoundingClientRect();
+  zoomStageAt((mobileView.zoom || 1) * factor, rect.left + rect.width / 2, rect.top + rect.height / 2);
+}
+function zoomStageAt(newZoom, clientX, clientY) {
+  const wrap = document.getElementById('stageContainer');
+  if (!wrap) return;
+  const rect = wrap.getBoundingClientRect();
+  const oldZoom = mobileView.zoom || 1;
+  newZoom = Math.max(0.3, Math.min(2.5, newZoom));
+  const localX = clientX - rect.left;
+  const localY = clientY - rect.top;
+  const worldX = (localX - mobileView.panX) / oldZoom;
+  const worldY = (localY - mobileView.panY) / oldZoom;
+  mobileView.zoom = newZoom;
+  mobileView.panX = localX - worldX * newZoom;
+  mobileView.panY = localY - worldY * newZoom;
+  mobileView.fitDone = true;
+  applyStageTransform();
+}
+
+function paletteChip(part) {
+  const label = part === 'empty' ? '＋空席' : '＋' + part;
+  const cls = part === 'empty' ? 'empty' : '';
+  const style = part === 'empty' ? '' : ' style="background:' + partColor(part) + '"';
+  return '<div class="palette-chip ' + cls + '"' + style + ' draggable="true" onclick="addNewSeatToTray(\'' + part + '\')" onpointerdown="palettePointerDown(event,\'' + part + '\')" ondragstart="dragNewSeatStart(event,\'' + part + '\')" ondragend="dragEnd()">' + label + '</div>';
+}
+function palettePointerDown(event, part) {
+  if (!isMobileLike() || event.pointerType === 'mouse') return;
+  try { event.currentTarget.setPointerCapture(event.pointerId); } catch (e) {}
+  const press = { part, pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, active: false, fromPalette: true };
+  press.timer = setTimeout(function(){ beginMobilePaletteDrag(press); }, 420);
+  mobileSeatPress = press;
+  document.addEventListener('pointermove', mobileSeatPressMove, { passive: false });
+  document.addEventListener('pointerup', mobileSeatPressEnd, { once: true, passive: false });
+  document.addEventListener('pointercancel', mobileSeatPressEnd, { once: true, passive: false });
+}
+function beginMobilePaletteDrag(press) {
+  if (!press || mobileSeatPress !== press) return;
+  const seat = createSeat(press.part);
+  state.unplaced = state.unplaced || [];
+  state.unplaced.push(seat);
+  state.selectedIds = [seat.id];
+  state.lastSelectedId = seat.id;
+  mobileSeatPress.active = true;
+  mobileSeatDrag = { active: true, pointerId: press.pointerId, ids: [seat.id], target: null, ghost: null, fromPalette: true };
+  mobileView.gesture = null;
+  mobileView.pointers.clear();
+  createMobileDragGhost(mobileSeatDrag.ids, press.startX, press.startY);
+  if (navigator.vibrate) { try { navigator.vibrate(20); } catch(e) {} }
+}
+function insertZoneTrayHtml(insertIndex) {
+  return '<div class="insert-zone no-print" title="未配置トレイのここに差し込み" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropToTrayAt(event,' + insertIndex + ')"></div>';
+}
+
+function seatClick(event, seatId) {
+  event.preventDefault(); event.stopPropagation(); hideContextMenu();
+  if (Date.now() < clickSuppressUntil) return;
+  if (singleClickTimer) clearTimeout(singleClickTimer);
+  const isRange = event.shiftKey;
+  const isToggle = event.ctrlKey || event.metaKey || state.multiSelectMode;
+  singleClickTimer = setTimeout(function() {
+    if (isRange) selectRangeTo(seatId);
+    else if (isToggle) toggleSeatSelection(seatId);
+    else { state.selectedIds = [seatId]; state.lastSelectedId = seatId; }
+    renderStage();
+  }, 180);
+}
+function seatDoubleClick(event, seatId) {
+  event.preventDefault(); event.stopPropagation();
+  // 複数選択ONのときは、短い間隔で次々タップした操作を編集扱いにしない。
+  // この場合は直前のクリック処理を生かし、選択/解除として扱う。
+  if (state.multiSelectMode) return;
+  if (singleClickTimer) { clearTimeout(singleClickTimer); singleClickTimer = null; }
+  openEditDialogById(seatId);
+}
+function toggleSeatSelection(seatId) { const idx = state.selectedIds.indexOf(seatId); if (idx >= 0) state.selectedIds.splice(idx, 1); else state.selectedIds.push(seatId); state.lastSelectedId = seatId; }
+function selectRangeTo(seatId) {
+  const last = state.lastSelectedId || seatId; const a = locateSeat(last); const b = locateSeat(seatId);
+  if (!a || !b || a.type !== b.type || a.r !== b.r) { state.selectedIds = Array.from(new Set([...(state.selectedIds || []), seatId])); state.lastSelectedId = seatId; return; }
+  const list = a.type === 'row' ? state.rows[a.r].seats : state.unplaced; const start = Math.min(a.i, b.i); const end = Math.max(a.i, b.i);
+  const ids = list.slice(start, end + 1).map(s => s.id); state.selectedIds = Array.from(new Set([...(state.selectedIds || []), ...ids])); state.lastSelectedId = seatId;
+}
+function clearSelection() { state.selectedIds = []; state.lastSelectedId = ''; renderStage(); }
+function toggleMultiSelectMode() { state.multiSelectMode = !state.multiSelectMode; updateMultiSelectButton(); }
+function updateMultiSelectButton() { const btn = document.getElementById('multiSelectBtn'); if (!btn) return; btn.textContent = '複数選択: ' + (state.multiSelectMode ? 'ON' : 'OFF'); btn.classList.toggle('toggle-on', !!state.multiSelectMode); }
+
+function setupStageBackgroundClick() {
+  const container = document.getElementById('stageContainer');
+  if (!container) return;
+  container.addEventListener('click', function(event) {
+    if (state.multiSelectMode) return;
+    if (event.target.closest('.seat, button, .insert-zone, .palette-chip, .trash-drop, .context-menu, .modal')) return;
+    if (state.selectedIds && state.selectedIds.length) clearSelection();
+  });
+}
+function setupRangeSelection() {
+  const container = document.getElementById('stageContainer');
+  if (!container) return;
+  container.addEventListener('pointerdown', function(event) {
+    if (event.pointerType && event.pointerType !== 'mouse') return;
+    if (event.button !== 0) return;
+    if (!state.rows || !state.rows.length) return;
+    if (event.target.closest('.seat, button, .insert-zone, .palette-chip, .trash-drop, .context-menu, .modal')) return;
+    startRangeSelection(event);
+  });
+}
+function startRangeSelection(event) {
+  event.preventDefault();
+  hideContextMenu();
+  const box = document.createElement('div');
+  box.className = 'selection-box';
+  document.body.appendChild(box);
+  rangeSelection = { startX: event.clientX, startY: event.clientY, currentX: event.clientX, currentY: event.clientY, box, moved: false, additive: event.ctrlKey || event.metaKey || state.multiSelectMode };
+  updateRangeSelectionBox();
+  document.addEventListener('pointermove', moveRangeSelection);
+  document.addEventListener('pointerup', finishRangeSelection, { once: true });
+}
+function moveRangeSelection(event) {
+  if (!rangeSelection) return;
+  rangeSelection.currentX = event.clientX;
+  rangeSelection.currentY = event.clientY;
+  if (Math.abs(rangeSelection.currentX - rangeSelection.startX) > 5 || Math.abs(rangeSelection.currentY - rangeSelection.startY) > 5) rangeSelection.moved = true;
+  updateRangeSelectionBox();
+}
+function updateRangeSelectionBox() {
+  if (!rangeSelection) return;
+  const left = Math.min(rangeSelection.startX, rangeSelection.currentX);
+  const top = Math.min(rangeSelection.startY, rangeSelection.currentY);
+  const width = Math.abs(rangeSelection.currentX - rangeSelection.startX);
+  const height = Math.abs(rangeSelection.currentY - rangeSelection.startY);
+  Object.assign(rangeSelection.box.style, { left: left + 'px', top: top + 'px', width: width + 'px', height: height + 'px' });
+}
+function finishRangeSelection(event) {
+  document.removeEventListener('pointermove', moveRangeSelection);
+  if (!rangeSelection) return;
+  const sel = rangeSelection;
+  if (sel.box && sel.box.parentNode) sel.box.parentNode.removeChild(sel.box);
+  rangeSelection = null;
+  if (!sel.moved) return;
+  const rect = {
+    left: Math.min(sel.startX, sel.currentX),
+    right: Math.max(sel.startX, sel.currentX),
+    top: Math.min(sel.startY, sel.currentY),
+    bottom: Math.max(sel.startY, sel.currentY),
+  };
+  const ids = [];
+  document.querySelectorAll('.seat[data-seat-id]').forEach(function(el) {
+    const r = el.getBoundingClientRect();
+    const hit = !(r.right < rect.left || r.left > rect.right || r.bottom < rect.top || r.top > rect.bottom);
+    if (hit) ids.push(el.getAttribute('data-seat-id'));
+  });
+  if (sel.additive) state.selectedIds = Array.from(new Set([...(state.selectedIds || []), ...ids]));
+  else state.selectedIds = ids;
+  state.lastSelectedId = state.selectedIds[state.selectedIds.length - 1] || '';
+  renderStage();
+}
+
+
+function setupMobileCanvasGestures() {
+  const container = document.getElementById('stageContainer');
+  if (!container) return;
+  container.addEventListener('pointerdown', mobileCanvasPointerDown, { passive: false });
+  container.addEventListener('pointermove', mobileCanvasPointerMove, { passive: false });
+  container.addEventListener('pointerup', mobileCanvasPointerUp, { passive: false });
+  container.addEventListener('pointercancel', mobileCanvasPointerUp, { passive: false });
+  container.addEventListener('dblclick', function(event) {
+    if (!isMobileLike()) return;
+    if (event.target.closest('.seat, button, input, select, textarea')) return;
+    event.preventDefault();
+    fitStageToScreen(true);
+  });
+}
+function mobileCanvasPointerDown(event) {
+  if (!isMobileLike() || !state.rows || !state.rows.length) return;
+  if (event.target.closest('button, input, select, textarea, .context-menu, .modal, .tray-wrap')) return;
+  if (event.pointerType === 'mouse') return;
+  if (mobileToolbarOpen) closeMobileEditorMenu();
+  hideContextMenu();
+  const wrap = document.getElementById('stageContainer');
+  try { wrap.setPointerCapture(event.pointerId); } catch (e) {}
+  mobileView.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+  if (mobileView.pointers.size === 1) {
+    mobileView.gesture = { mode: 'pan', startX: event.clientX, startY: event.clientY, panX: mobileView.panX, panY: mobileView.panY };
+  } else if (mobileView.pointers.size === 2) {
+    const pts = Array.from(mobileView.pointers.values());
+    const c = midpoint(pts[0], pts[1]);
+    mobileView.gesture = { mode: 'pinch', dist: distance(pts[0], pts[1]), centerX: c.x, centerY: c.y, zoom: mobileView.zoom, panX: mobileView.panX, panY: mobileView.panY };
+  }
+}
+function mobileCanvasPointerMove(event) {
+  if (!isMobileLike() || !mobileView.pointers.has(event.pointerId)) return;
+  if (mobileSeatDrag && mobileSeatDrag.active) return;
+  mobileView.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+  if (!mobileView.gesture) return;
+  event.preventDefault();
+  if (mobileView.pointers.size === 1 && mobileView.gesture.mode === 'pan') {
+    mobileView.panX = mobileView.gesture.panX + (event.clientX - mobileView.gesture.startX);
+    mobileView.panY = mobileView.gesture.panY + (event.clientY - mobileView.gesture.startY);
+    mobileView.fitDone = true;
+    applyStageTransform();
+  } else if (mobileView.pointers.size >= 2) {
+    const pts = Array.from(mobileView.pointers.values()).slice(0, 2);
+    const c = midpoint(pts[0], pts[1]);
+    const d = Math.max(1, distance(pts[0], pts[1]));
+    const g = mobileView.gesture.mode === 'pinch' ? mobileView.gesture : { mode: 'pinch', dist: d, centerX: c.x, centerY: c.y, zoom: mobileView.zoom, panX: mobileView.panX, panY: mobileView.panY };
+    const wrap = document.getElementById('stageContainer');
+    const rect = wrap.getBoundingClientRect();
+    const newZoom = Math.max(0.3, Math.min(2.5, g.zoom * d / Math.max(1, g.dist)));
+    const worldX = (g.centerX - rect.left - g.panX) / g.zoom;
+    const worldY = (g.centerY - rect.top - g.panY) / g.zoom;
+    mobileView.zoom = newZoom;
+    mobileView.panX = (c.x - rect.left) - worldX * newZoom;
+    mobileView.panY = (c.y - rect.top) - worldY * newZoom;
+    mobileView.fitDone = true;
+    applyStageTransform();
+  }
+}
+function mobileCanvasPointerUp(event) {
+  if (!isMobileLike()) return;
+  mobileView.pointers.delete(event.pointerId);
+  if (mobileView.pointers.size === 0) mobileView.gesture = null;
+  else if (mobileView.pointers.size === 1) {
+    const p = Array.from(mobileView.pointers.values())[0];
+    mobileView.gesture = { mode: 'pan', startX: p.x, startY: p.y, panX: mobileView.panX, panY: mobileView.panY };
+  }
+}
+function distance(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
+function midpoint(a, b) { return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; }
+function seatPointerDown(event, seatId) {
+  cancelLongPress();
+  if (isMobileLike() && event.pointerType !== 'mouse') {
+    try { event.currentTarget.setPointerCapture(event.pointerId); } catch (e) {}
+    const press = { seatId, pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, active: false };
+    press.timer = setTimeout(function(){ beginMobileSeatDrag(press); }, 520);
+    mobileSeatPress = press;
+    document.addEventListener('pointermove', mobileSeatPressMove, { passive: false });
+    document.addEventListener('pointerup', mobileSeatPressEnd, { once: true, passive: false });
+    document.addEventListener('pointercancel', mobileSeatPressEnd, { once: true, passive: false });
+  } else {
+    startLongPress(event, function(ev){ openSeatMenu(ev, seatId); });
+  }
+}
+function seatPointerUp(event) { if (!isMobileLike()) cancelLongPress(); }
+function seatPointerCancel(event) { if (!isMobileLike()) cancelLongPress(); }
+function mobileSeatPressMove(event) {
+  if (!mobileSeatPress || event.pointerId !== mobileSeatPress.pointerId) return;
+  const dx = event.clientX - mobileSeatPress.startX;
+  const dy = event.clientY - mobileSeatPress.startY;
+  if (!mobileSeatPress.active && Math.hypot(dx, dy) > 8) {
+    clearTimeout(mobileSeatPress.timer);
+    mobileSeatPress.timer = null;
+  }
+  if (mobileSeatDrag && mobileSeatDrag.active) {
+    event.preventDefault();
+    updateMobileSeatDrag(event.clientX, event.clientY);
+  }
+}
+function mobileSeatPressEnd(event) {
+  document.removeEventListener('pointermove', mobileSeatPressMove);
+  if (mobileSeatPress && mobileSeatPress.timer) clearTimeout(mobileSeatPress.timer);
+  if (mobileSeatDrag && mobileSeatDrag.active) {
+    event.preventDefault();
+    finishMobileSeatDrag(event.clientX, event.clientY);
+  }
+  mobileSeatPress = null;
+}
+function beginMobileSeatDrag(press) {
+  if (!press || mobileSeatPress !== press) return;
+  const seatId = press.seatId;
+  if (!state.selectedIds.includes(seatId)) state.selectedIds = [seatId];
+  state.lastSelectedId = seatId;
+  mobileSeatPress.active = true;
+  const dragIds = state.selectedIds.slice();
+  mobileSeatDrag = {
+    active: true,
+    pointerId: press.pointerId,
+    ids: dragIds,
+    target: null,
+    ghost: null,
+    startX: press.startX,
+    startY: press.startY,
+    startSignature: layoutOrderSignature(),
+    sourceLocs: dragIds.map(function(id){ const loc = locateSeat(id); return loc ? { id: id, type: loc.type, r: loc.r, i: loc.i } : null; }).filter(Boolean),
+    sourceRects: captureMobileSourceRects(dragIds)
+  };
+  mobileView.gesture = null;
+  mobileView.pointers.clear();
+  createMobileDragGhost(mobileSeatDrag.ids, press.startX, press.startY);
+  markMobileDragSources();
+  if (navigator.vibrate) { try { navigator.vibrate(20); } catch(e) {} }
+}
+function createMobileDragGhost(ids, x, y) {
+  removeMobileDragGhost();
+  const ghost = document.createElement('div');
+  ghost.className = 'mobile-drag-ghost';
+  const seats = ids.slice(0, 4).map(getSeatById).filter(Boolean);
+  seats.forEach(function(seat) {
+    const div = document.createElement('div');
+    div.className = 'seat ' + (seat.empty ? 'empty' : '');
+    if (!seat.empty) div.style.background = partColor(seat.part);
+    div.innerHTML = '<div class="seat-part">' + escapeHtml(seat.empty ? '-' : seat.part) + '</div><div class="seat-name">' + escapeHtml(seat.empty ? '空席' : (seat.name || seat.label || seat.part)) + '</div>';
+    ghost.appendChild(div);
+  });
+  if (ids.length > 4) {
+    const more = document.createElement('div');
+    more.style.cssText = 'color:#fff;font-weight:800;padding:0 6px;';
+    more.textContent = '+' + (ids.length - 4);
+    ghost.appendChild(more);
+  }
+  document.body.appendChild(ghost);
+  mobileSeatDrag.ghost = ghost;
+  updateMobileSeatDrag(x, y);
+}
+function removeMobileDragGhost() {
+  const old = document.querySelector('.mobile-drag-ghost');
+  if (old && old.parentNode) old.parentNode.removeChild(old);
+}
+function markMobileDragSources() {
+  document.querySelectorAll('.seat.mobile-drag-source').forEach(el => el.classList.remove('mobile-drag-source'));
+  if (!mobileSeatDrag || !mobileSeatDrag.active) return;
+  mobileSeatDrag.ids.forEach(function(id) {
+    const el = document.querySelector('.seat[data-seat-id="' + cssEscape(id) + '"]');
+    if (el) el.classList.add('mobile-drag-source');
+  });
+}
+function captureMobileSourceRects(ids) {
+  return (ids || []).map(function(id) {
+    const el = document.querySelector('.seat[data-seat-id="' + cssEscape(id) + '"]');
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    return { id: id, left: r.left, right: r.right, top: r.top, bottom: r.bottom, width: r.width, height: r.height };
+  }).filter(Boolean);
+}
+function updateMobileSeatDrag(x, y) {
+  if (!mobileSeatDrag || !mobileSeatDrag.active) return;
+  if (mobileSeatDrag.ghost) {
+    mobileSeatDrag.ghost.style.left = x + 'px';
+    mobileSeatDrag.ghost.style.top = y + 'px';
+  }
+  document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+  const target = findMobileDropTarget(x, y);
+  mobileSeatDrag.target = target;
+  if (target && target.el) target.el.classList.add('drag-over');
+  showMobileInsertPreview(target, x, y);
+}
+function showMobileInsertPreview(target, x, y) {
+  clearMobileInsertPreview();
+  if (!isMobileLike() || !target || target.type === 'trash') return;
+  const bubble = document.createElement('div');
+  bubble.className = 'mobile-insert-preview';
+  let text = '';
+  let lineX = x;
+  let lineTop = y - 36;
+  let lineHeight = 46;
+  if (target.type === 'row') {
+    const rowNo = Number(target.rowIndex) + 1;
+    const rowName = rowLabel(rowNo, state.rows.length);
+    text = rowName + '：' + insertLabelForTarget(target, state.rows[target.rowIndex] ? state.rows[target.rowIndex].seats : []);
+    const geom = insertionGeometry(target.el, target.index);
+    if (geom) { lineX = geom.x; lineTop = geom.top; lineHeight = geom.height; }
+  } else if (target.type === 'tray') {
+    text = '未配置：' + insertLabelForTarget(target, state.unplaced || []);
+    const geom = insertionGeometry(target.el, target.index);
+    if (geom) { lineX = geom.x; lineTop = geom.top; lineHeight = geom.height; }
+  }
+  bubble.textContent = text || 'ここに挿入';
+  bubble.style.left = Math.min(window.innerWidth - 20, Math.max(20, x)) + 'px';
+  bubble.style.top = Math.max(42, y - 44) + 'px';
+  const line = document.createElement('div');
+  line.className = 'mobile-insert-line';
+  line.style.left = lineX + 'px';
+  line.style.top = lineTop + 'px';
+  line.style.height = lineHeight + 'px';
+  document.body.appendChild(line);
+  document.body.appendChild(bubble);
+}
+function clearMobileInsertPreview() {
+  document.querySelectorAll('.mobile-insert-preview,.mobile-insert-line').forEach(function(el) { if (el.parentNode) el.parentNode.removeChild(el); });
+}
+function insertLabelForTarget(target, seats) {
+  const idx = Math.max(0, Math.min(Number(target.index) || 0, (seats || []).length));
+  if (!seats || !seats.length) return '先頭に挿入';
+  if (idx <= 0) return (seats[0].label || seats[0].part || '先頭') + ' の前に挿入';
+  if (idx >= seats.length) return (seats[seats.length - 1].label || seats[seats.length - 1].part || '末尾') + ' の後に挿入';
+  return (seats[idx - 1].label || seats[idx - 1].part || '') + ' と ' + (seats[idx].label || seats[idx].part || '') + ' の間に挿入';
+}
+function insertionGeometry(container, index) {
+  if (!container) return null;
+  const seats = Array.from(container.querySelectorAll('.seat[data-seat-id]'));
+  const cr = container.getBoundingClientRect();
+  let x = cr.left + cr.width / 2;
+  if (seats.length) {
+    if (index <= 0) x = seats[0].getBoundingClientRect().left - 8;
+    else if (index >= seats.length) x = seats[seats.length - 1].getBoundingClientRect().right + 8;
+    else {
+      const a = seats[index - 1].getBoundingClientRect();
+      const b = seats[index].getBoundingClientRect();
+      x = (a.right + b.left) / 2;
+    }
+  }
+  return { x, top: cr.top + 5, height: Math.max(36, cr.height - 10) };
+}
+
+function findMobileDropTarget(x, y) {
+  const el = document.elementFromPoint(x, y);
+  if (!el) return null;
+  const trash = el.closest('.trash-drop');
+  if (trash) return { type: 'trash', el: trash };
+  const trayList = el.closest('.tray-list');
+  if (trayList) return { type: 'tray', index: mobileInsertIndexFromContainer(trayList, x), el: trayList };
+  const row = el.closest('.stage-row');
+  if (row) return { type: 'row', rowIndex: Number(row.getAttribute('data-row')), index: mobileInsertIndexFromContainer(row, x), el: row };
+  const tray = el.closest('.tray-wrap.open');
+  if (tray) {
+    const list = tray.querySelector('.tray-list');
+    if (list) return { type: 'tray', index: state.unplaced.length, el: list };
+  }
+  if (el.closest('#stageContainer, .stage-inner, .stage, .stage-row-block')) {
+    const nearest = findNearestMobileRowTarget(x, y);
+    if (nearest) return nearest;
+  }
+  return null;
+}
+function findNearestMobileRowTarget(x, y) {
+  const rows = Array.from(document.querySelectorAll('.stage-row[data-row]'));
+  if (!rows.length) return null;
+  let best = null;
+  rows.forEach(function(rowEl) {
+    const r = rowEl.getBoundingClientRect();
+    const dx = x < r.left ? r.left - x : (x > r.right ? x - r.right : 0);
+    const dy = y < r.top ? r.top - y : (y > r.bottom ? y - r.bottom : 0);
+    const score = dy * 2 + dx * 0.15;
+    if (!best || score < best.score) best = { rowEl, score };
+  });
+  if (!best || best.score > 120) return null;
+  return { type: 'row', rowIndex: Number(best.rowEl.getAttribute('data-row')), index: mobileInsertIndexFromContainer(best.rowEl, x), el: best.rowEl };
+}
+function mobileInsertIndexFromContainer(container, x) {
+  const seats = Array.from(container.querySelectorAll('.seat[data-seat-id]'));
+  let index = 0;
+  seats.forEach(function(seatEl) {
+    const r = seatEl.getBoundingClientRect();
+    if (x > r.left + r.width / 2) index++;
+  });
+  return index;
+}
+function finishMobileSeatDrag(x, y) {
+  const dragInfo = mobileSeatDrag;
+  const target = dragInfo ? dragInfo.target || findMobileDropTarget(x, y) : null;
+  const ids = dragInfo ? dragInfo.ids.slice() : [];
+  const wasPaletteDrag = !!(dragInfo && dragInfo.fromPalette);
+  const shouldCancel = dragInfo && !wasPaletteDrag && isMobileDropBackToOrigin(dragInfo, target, x, y);
+  removeMobileDragGhost();
+  clearMobileInsertPreview();
+  document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+  document.querySelectorAll('.seat.mobile-drag-source').forEach(el => el.classList.remove('mobile-drag-source'));
+  mobileSeatDrag = null;
+  if (shouldCancel) { renderStage(); return; }
+  if (!target || !ids.length) { if (wasPaletteDrag) commitHistory(); renderStage(); return; }
+  if (target.type === 'trash') {
+    if (confirm(ids.length + '枚のカードを削除しますか？')) {
+      removeSeatsByIds(ids); state.selectedIds = []; commitHistory();
+    }
+    renderStage(); return;
+  }
+  if (target.type === 'row') moveIdsToRow(ids, target.rowIndex, target.index);
+  if (target.type === 'tray') moveIdsToTray(ids, target.index);
+}
+function isMobileDropBackToOrigin(dragInfo, target, x, y) {
+  if (!dragInfo || !dragInfo.ids || !dragInfo.ids.length) return false;
+  // 長押しして少し動いたものの、元の指位置付近に戻した場合はキャンセルする。
+  if (Number.isFinite(dragInfo.startX) && Number.isFinite(dragInfo.startY)) {
+    if (Math.hypot(x - dragInfo.startX, y - dragInfo.startY) < 48) return true;
+  }
+  const el = document.elementFromPoint(x, y);
+  // 元カードの上に戻した場合は、スマホでは「元の場所に戻した」とみなす。
+  if (el && el.closest && el.closest('.seat.mobile-drag-source')) return true;
+  // 複数列・複数段にまたがる選択では、元カード群の表示範囲に戻しただけで
+  // 1つの段へまとめて挿入されてしまうのを避ける。
+  const rects = dragInfo.sourceRects || [];
+  for (let i = 0; i < rects.length; i++) {
+    const r = rects[i];
+    if (x >= r.left - 18 && x <= r.right + 18 && y >= r.top - 18 && y <= r.bottom + 18) return true;
+  }
+  if (!target || !dragInfo.sourceLocs || !dragInfo.sourceLocs.length) return false;
+  const sourceContainers = new Set(dragInfo.sourceLocs.map(function(loc){ return loc.type + ':' + loc.r; }));
+  const multiContainer = sourceContainers.size > 1;
+  if (target.type === 'row') {
+    const key = 'row:' + target.rowIndex;
+    if (sourceContainers.has(key)) {
+      const rowRects = rects.filter(function(r){
+        const loc = dragInfo.sourceLocs.find(function(l){ return l.id === r.id; });
+        return loc && loc.type === 'row' && loc.r === target.rowIndex;
+      });
+      if (rowRects.length) {
+        const left = Math.min.apply(null, rowRects.map(r => r.left)) - 34;
+        const right = Math.max.apply(null, rowRects.map(r => r.right)) + 34;
+        const top = Math.min.apply(null, rowRects.map(r => r.top)) - 26;
+        const bottom = Math.max.apply(null, rowRects.map(r => r.bottom)) + 26;
+        if (x >= left && x <= right && y >= top && y <= bottom) return true;
+      }
+      // 複数の段から選択しているとき、元の段の上で離しただけなら
+      // その段に全カードを集約せずキャンセルする。
+      if (multiContainer) {
+        const rowEl = document.querySelector('.stage-row[data-row="' + target.rowIndex + '"]');
+        if (rowEl) {
+          const rr = rowEl.getBoundingClientRect();
+          if (y >= rr.top - 20 && y <= rr.bottom + 20) return true;
+        }
+      }
+    }
+  }
+  if (target.type === 'tray' && sourceContainers.has('tray:-1')) {
+    const trayRects = rects.filter(function(r){
+      const loc = dragInfo.sourceLocs.find(function(l){ return l.id === r.id; });
+      return loc && loc.type === 'tray';
+    });
+    if (trayRects.length) {
+      const left = Math.min.apply(null, trayRects.map(r => r.left)) - 34;
+      const right = Math.max.apply(null, trayRects.map(r => r.right)) + 34;
+      const top = Math.min.apply(null, trayRects.map(r => r.top)) - 26;
+      const bottom = Math.max.apply(null, trayRects.map(r => r.bottom)) + 26;
+      if (x >= left && x <= right && y >= top && y <= bottom) return true;
+    }
+  }
+  return false;
+}
+function moveIdsToRow(ids, rowIndex, insertIndex) {
+  const beforeSignature = layoutOrderSignature();
+  const drag = { type: 'ids', ids };
+  const adjusted = adjustInsertIndexAfterRemoval(rowIndex, insertIndex, drag);
+  const items = removeSeatsByIds(ids);
+  if (!items.length || !state.rows[rowIndex]) { renderStage(); return; }
+  state.rows[rowIndex].seats.splice(adjusted, 0, ...items);
+  state.selectedIds = items.map(s => s.id); state.lastSelectedId = state.selectedIds[state.selectedIds.length - 1] || '';
+  if (beforeSignature !== layoutOrderSignature()) commitHistory();
+  renderStage();
+}
+function moveIdsToTray(ids, insertIndex) {
+  const beforeSignature = layoutOrderSignature();
+  const drag = { type: 'ids', ids };
+  const adjusted = adjustTrayInsertIndexAfterRemoval(insertIndex, drag);
+  const items = removeSeatsByIds(ids);
+  if (!items.length) { renderStage(); return; }
+  state.unplaced.splice(adjusted, 0, ...items);
+  state.selectedIds = items.map(s => s.id); state.lastSelectedId = state.selectedIds[state.selectedIds.length - 1] || '';
+  if (beforeSignature !== layoutOrderSignature()) commitHistory();
+  renderStage();
+}
+function cssEscape(value) {
+  if (window.CSS && CSS.escape) return CSS.escape(value);
+  return String(value).replace(/[^a-zA-Z0-9_-]/g, '\\$&');
+}
+
+function dragSeatStart(event, seatId) {
+  if (isMobileLike()) { event.preventDefault(); return false; }
+  hideContextMenu(); cancelLongPress(); if (singleClickTimer) { clearTimeout(singleClickTimer); singleClickTimer = null; } clickSuppressUntil = Date.now() + 250;
+  if (!state.selectedIds.includes(seatId)) state.selectedIds = [seatId];
+  state.lastSelectedId = seatId; state.drag = { type: 'ids', ids: state.selectedIds.slice() };
+  event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', JSON.stringify(state.drag));
+}
+function dragNewSeatStart(event, part) { state.drag = { type: 'new', part }; event.dataTransfer.effectAllowed = 'copy'; event.dataTransfer.setData('text/plain', JSON.stringify(state.drag)); }
+function dragEnd() { state.drag = null; clearMobileInsertPreview(); document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); }
+function dragOver(event) { event.preventDefault(); const target = event.currentTarget; if (target) target.classList.add('drag-over'); }
+function dragLeave(event) { const target = event.currentTarget; if (target) target.classList.remove('drag-over'); }
+function rowDragOver(event) { event.preventDefault(); event.currentTarget.classList.add('drag-over'); }
+function rowDragLeave(event) { event.currentTarget.classList.remove('drag-over'); }
+function getDragData(event) { if (state.drag) return state.drag; try { return JSON.parse(event.dataTransfer.getData('text/plain') || '{}'); } catch (e) { return {}; } }
+
+function layoutOrderSignature() {
+  return JSON.stringify({
+    rows: (state.rows || []).map(function(row) { return (row.seats || []).map(function(seat) { return seat.id; }); }),
+    unplaced: (state.unplaced || []).map(function(seat) { return seat.id; })
+  });
+}
+function finishDropByOrderChange(beforeSignature, selectedItems) {
+  const afterSignature = layoutOrderSignature();
+  state.drag = null;
+  if (selectedItems && selectedItems.length) {
+    state.selectedIds = selectedItems.map(function(s) { return s.id; });
+    state.lastSelectedId = state.selectedIds[state.selectedIds.length - 1] || '';
+  }
+  if (beforeSignature !== afterSignature) commitHistory();
+  renderStage();
+}
+function dropToRowAt(event, rowIndex, insertIndex) {
+  event.preventDefault(); event.stopPropagation(); const drag = getDragData(event); if (!state.rows[rowIndex]) return;
+  const beforeSignature = layoutOrderSignature();
+  const adjusted = adjustInsertIndexAfterRemoval(rowIndex, insertIndex, drag);
+  const items = takeDraggedItems(drag, { type: 'row', r: rowIndex, i: insertIndex }); if (!items.length) return;
+  state.rows[rowIndex].seats.splice(adjusted, 0, ...items);
+  finishDropByOrderChange(beforeSignature, items);
+}
+function dropToTray(event) { event.preventDefault(); event.stopPropagation(); dropToTrayAt(event, state.unplaced.length); }
+function dropToTrayAt(event, insertIndex) {
+  event.preventDefault(); event.stopPropagation(); const drag = getDragData(event); state.unplaced = state.unplaced || [];
+  const beforeSignature = layoutOrderSignature();
+  const adjusted = adjustTrayInsertIndexAfterRemoval(insertIndex, drag);
+  const items = takeDraggedItems(drag, { type: 'tray', r: -1, i: insertIndex }); if (!items.length) return;
+  state.unplaced.splice(adjusted, 0, ...items);
+  finishDropByOrderChange(beforeSignature, items);
+}
+function dropToTrash(event) {
+  event.preventDefault(); event.stopPropagation(); const drag = getDragData(event); if (!drag || drag.type === 'new') { state.drag = null; renderStage(); return; }
+  const ids = drag.ids || []; if (!ids.length) return;
+  if (!confirm(ids.length + '枚のカードを削除しますか？')) { state.drag = null; renderStage(); return; }
+  removeSeatsByIds(ids); state.selectedIds = []; state.drag = null; commitHistory(); renderStage();
+}
+function takeDraggedItems(drag) {
+  if (!drag) return [];
+  if (drag.type === 'new') return [createSeat(drag.part)];
+  if (drag.type === 'ids') return removeSeatsByIds(drag.ids || []);
+  return [];
+}
+function adjustInsertIndexAfterRemoval(rowIndex, insertIndex, drag) {
+  if (!drag || drag.type !== 'ids') return insertIndex;
+  const before = (drag.ids || []).filter(function(id) { const loc = findSeatLocationBeforeRemoval(id); return loc && loc.type === 'row' && loc.r === rowIndex && loc.i < insertIndex; }).length;
+  return Math.max(0, insertIndex - before);
+}
+function adjustTrayInsertIndexAfterRemoval(insertIndex, drag) {
+  if (!drag || drag.type !== 'ids') return insertIndex;
+  const before = (drag.ids || []).filter(function(id) { const loc = findSeatLocationBeforeRemoval(id); return loc && loc.type === 'tray' && loc.i < insertIndex; }).length;
+  return Math.max(0, insertIndex - before);
+}
+function findSeatLocationBeforeRemoval(id) { return locateSeat(id); }
+function removeSeatsByIds(ids) {
+  const idSet = new Set(ids || []); const items = [];
+  state.rows.forEach(function(row) {
+    const keep = [];
+    row.seats.forEach(function(seat) { if (idSet.has(seat.id)) items.push(seat); else keep.push(seat); });
+    row.seats = keep;
+  });
+  const keepTray = [];
+  (state.unplaced || []).forEach(function(seat) { if (idSet.has(seat.id)) items.push(seat); else keepTray.push(seat); });
+  state.unplaced = keepTray;
+  const order = new Map((ids || []).map((id, idx) => [id, idx]));
+  items.sort((a, b) => (order.get(a.id) || 0) - (order.get(b.id) || 0));
+  return items;
+}
+
+function addNewSeatToTray(part) { state.unplaced = state.unplaced || []; const seat = createSeat(part); state.unplaced.push(seat); state.selectedIds = [seat.id]; commitHistory(); renderStage(); }
+function addSeatAt(rowIndex, insertIndex, part) { if (!state.rows[rowIndex]) return; const seat = createSeat(part); state.rows[rowIndex].seats.splice(insertIndex, 0, seat); state.selectedIds = [seat.id]; commitHistory(); renderStage(); }
+function createSeat(part) {
+  if (part === 'empty') return { id: newSeatId('empty'), part: '', label: '空席', name: '', empty: true };
+  const n = nextPartNumber(part); return { id: newSeatId(part), part, label: part + pad2(n), name: '', empty: false };
+}
+function nextPartNumber(part) {
+  let max = 0; const all = getAllSeats();
+  all.forEach(function(seat) { if (seat.part === part && seat.label) { const m = String(seat.label).match(/[0-9]+$/); if (m) max = Math.max(max, Number(m[0]) || 0); } });
+  return max + 1;
+}
+function newSeatId(part) { return (part || 'seat') + '_' + Date.now() + '_' + Math.random().toString(36).slice(2); }
+
+function openEditDialogById(seatId) { const loc = locateSeat(seatId); if (!loc) return; openEditDialog(seatId); }
+function openEditDialog(seatId) {
+  const seat = getSeatById(seatId); if (!seat) return;
+  const backdrop = document.getElementById('editModal');
+  const currentPart = seat.empty ? 'empty' : seat.part;
+  const partOptions = '<option value="empty">空席</option>' + PARTS.map(function(part){ return '<option value="' + escapeAttr(part) + '">' + escapeHtml(part) + '</option>'; }).join('');
+  backdrop.innerHTML = '<div class="modal" onclick="event.stopPropagation()"><h2>カード編集</h2><div class="modal-grid">' +
+    '<div><label>種別 / パート</label><select id="editPart">' + partOptions + '</select></div>' +
+    '<div><label>名前</label><input id="editName" type="text" value="' + escapeAttr(seat.name || '') + '" placeholder="例：山田花子"></div>' +
+    '<div><label>表示ラベル</label><input id="editLabel" type="text" value="' + escapeAttr(seat.label || '') + '" placeholder="例：S01"></div>' +
+    '<div class="row" style="justify-content:flex-end; margin-top:8px;">' +
+    '<button class="light" onclick="closeEditModal()">キャンセル</button><button class="ghost" onclick="moveSeatIdToTray(\'' + seatId + '\')">未配置へ</button><button class="danger" onclick="deleteSeatId(\'' + seatId + '\')">削除</button><button onclick="saveEditDialog(\'' + seatId + '\')">保存</button>' +
+    '</div></div></div>';
+  backdrop.classList.remove('hidden'); backdrop.onclick = closeEditModal;
+  document.getElementById('editPart').value = currentPart;
+  setTimeout(function() { const input = document.getElementById('editName'); if (input) input.focus(); }, 0);
+}
+function saveEditDialog(seatId) {
+  const seat = getSeatById(seatId); if (!seat) return;
+  const part = document.getElementById('editPart').value; const name = document.getElementById('editName').value.trim(); const label = document.getElementById('editLabel').value.trim();
+  if (part === 'empty') { seat.empty = true; seat.part = ''; seat.name = ''; seat.label = label || '空席'; }
+  else { seat.empty = false; seat.part = part; seat.name = name; seat.label = label || part + pad2(nextPartNumber(part)); }
+  closeEditModal(); commitHistory(); renderStage();
+}
+function closeEditModal() { const backdrop = document.getElementById('editModal'); backdrop.classList.add('hidden'); backdrop.innerHTML = ''; }
+function moveSeatIdToTray(seatId) { const items = removeSeatsByIds([seatId]); if (!items.length) return; state.unplaced.push(items[0]); state.selectedIds = [seatId]; closeEditModal(); commitHistory(); renderStage(); }
+function deleteSeatId(seatId) { if (!confirm('このカードを削除しますか？')) return; removeSeatsByIds([seatId]); state.selectedIds = state.selectedIds.filter(id => id !== seatId); closeEditModal(); commitHistory(); renderStage(); }
+function deleteSelectedSeats() { if (!state.selectedIds.length) return; if (!confirm(state.selectedIds.length + '枚のカードを削除しますか？')) return; removeSeatsByIds(state.selectedIds); state.selectedIds = []; commitHistory(); renderStage(); }
+function moveSelectedToTray() { if (!state.selectedIds || !state.selectedIds.length) { alert('未配置へ移動したいカードを選択してください。'); return; } const items = removeSeatsByIds(state.selectedIds); state.unplaced = state.unplaced || []; state.unplaced.push(...items); state.selectedIds = items.map(s => s.id); commitHistory(); renderStage(); }
+
+function openSeatMenu(event, seatId) {
+  event.preventDefault(); event.stopPropagation(); cancelLongPress(); state.selectedIds = state.selectedIds.includes(seatId) ? state.selectedIds : [seatId];
+  const loc = locateSeat(seatId); const items = [];
+  if (loc && loc.type === 'row') {
+    items.push(['前に空席を追加', () => addSeatAt(loc.r, loc.i, 'empty')], ['後ろに空席を追加', () => addSeatAt(loc.r, loc.i + 1, 'empty')], 'sep');
+  }
+  items.push(['編集', () => openEditDialogById(seatId)], ['未配置へ移動', () => moveSeatIdToTray(seatId)], ['削除', () => deleteSeatId(seatId), 'danger']);
+  showContextMenu(event, items); renderStage();
+}
+function openRowMenu(event, rowIndex, insertIndex) {
+  event.preventDefault(); event.stopPropagation(); cancelLongPress();
+  const items = [['ここに空席を追加', () => addSeatAt(rowIndex, insertIndex, 'empty')], 'sep'];
+  PARTS.forEach(function(part) { items.push(['ここに ' + part + ' を追加', () => addSeatAt(rowIndex, insertIndex, part)]); });
+  showContextMenu(event, items);
+}
+function addSeatMenuFromButton(event, rowIndex, insertIndex) { openRowMenu(event, rowIndex, insertIndex); }
+function showContextMenu(event, items) {
+  const menu = document.getElementById('contextMenu'); menu.innerHTML = '';
+  items.forEach(function(item) {
+    if (item === 'sep') { const sep = document.createElement('div'); sep.className = 'context-separator'; menu.appendChild(sep); return; }
+    const btn = document.createElement('button'); btn.textContent = item[0]; if (item[2] === 'danger') btn.classList.add('danger-item');
+    btn.onclick = function(e) { e.stopPropagation(); hideContextMenu(); item[1](); };
+    menu.appendChild(btn);
+  });
+  menu.style.left = Math.min(event.clientX, window.innerWidth - 220) + 'px'; menu.style.top = Math.min(event.clientY, window.innerHeight - 260) + 'px'; menu.classList.remove('hidden');
+}
+function hideContextMenu() { document.getElementById('contextMenu').classList.add('hidden'); }
+function startLongPress(event, handler) { cancelLongPress(); longPressTimer = setTimeout(function() { clickSuppressUntil = Date.now() + 500; handler(event); }, 650); }
+function cancelLongPress() { if (longPressTimer) clearTimeout(longPressTimer); longPressTimer = null; }
+
+function renumberSeatLabels(options) {
+  if (!state.rows || !state.rows.length) { alert('リナンバーする配置がありません。'); return; }
+  const counters = emptyCounts();
+  const renumber = function(seat) {
+    if (!seat || seat.empty || !seat.part) return;
+    counters[seat.part] = (Number(counters[seat.part]) || 0) + 1;
+    seat.label = seat.part + pad2(counters[seat.part]);
+  };
+  (state.rows || []).slice().sort((a, b) => (Number(a.rowNo) || 0) - (Number(b.rowNo) || 0)).forEach(row => (row.seats || []).forEach(renumber));
+  (state.unplaced || []).forEach(renumber);
+  if (!options || !options.silent) {
+    commitHistory();
+    renderStage();
+    alert('前列→後列、各段は左→右の順に仮番号を振り直しました。');
+  }
+}
+
+function openNameEntrySheet() {
+  if (!state.rows || !state.rows.length) { alert('先に配置を作成してください。'); return; }
+  renumberSeatLabels({ silent: true });
+  state.counts = countFromLayout();
+  renderStage();
+  saveDraftNow('export-name-csv');
+  const rows = [];
+  rows.push(['仮番号','パート','段','左右位置','氏名','メモ','seat_id']);
+  (state.rows || []).slice().sort((a, b) => (Number(a.rowNo) || 0) - (Number(b.rowNo) || 0)).forEach(function(row) {
+    (row.seats || []).forEach(function(seat, idx) {
+      if (!seat || seat.empty) return;
+      rows.push([seat.label || '', seat.part || '', rowLabel(row.rowNo, state.rows.length), idx + 1, seat.name || '', seat.memo || '', seat.id || '']);
+    });
+  });
+  (state.unplaced || []).forEach(function(seat, idx) {
+    if (!seat || seat.empty) return;
+    rows.push([seat.label || '', seat.part || '', '未配置', idx + 1, seat.name || '', seat.memo || '', seat.id || '']);
+  });
+  const csv = rowsToCsv(rows);
+  downloadTextFile(csv, buildNameCsvFileName(), 'text/csv;charset=utf-8');
+  showSheetLink('', rows.length - 1, '名前入力用CSVを保存しました。CSVの「氏名」列に入力後、「名前CSVを反映」から読み込んでください。');
+}
+function buildNameCsvFileName() {
+  const rawTitle = (getCurrentTitle() || state.title || '名前入力').trim();
+  const safeTitle = rawTitle.replace(/[\\/:*?"<>|]/g, '_').replace(/\s+/g, ' ').trim() || '名前入力';
+  const d = new Date();
+  return safeTitle + '_name_entry_' + d.getFullYear() + pad2(d.getMonth()+1) + pad2(d.getDate()) + '.csv';
+}
+function applyNamesFromNameEntrySheet() {
+  if (!state.rows || !state.rows.length) { alert('先に反映先の配置を開いてください。'); return; }
+  const input = document.getElementById('nameCsvInput');
+  if (input) input.click();
+}
+function importNameEntryCsv(event) {
+  const file = event && event.target && event.target.files && event.target.files[0];
+  if (!file) return;
+  readTextFile(file).then(function(text) {
+    const result = applyNameEntryCsvText(text);
+    commitHistory();
+    updateSummary();
+    renderStage();
+    alert('名前CSVから ' + result.updated + '枚のカードへ名前を反映しました。' + (result.warnings.length ? '\n\n' + result.warnings.join('\n') : ''));
+  }).catch(showError).finally(function() { if (event.target) event.target.value = ''; });
+}
+function applyNameEntryCsvText(text) {
+  const rows = parseTableText(text || '');
+  const warnings = [];
+  if (!rows.length) return { updated: 0, warnings: ['CSVが空です。'] };
+  let startIndex = 0;
+  let labelIdx = 0, partIdx = 1, nameIdx = 4, memoIdx = 5, seatIdIdx = 6;
+  const header = rows[0].map(v => String(v || '').trim().toLowerCase());
+  const hasHeader = header.some(v => ['仮番号','label','ラベル'].includes(v)) || header.some(v => ['seat_id','seatid','id'].includes(v));
+  if (hasHeader) {
+    startIndex = 1;
+    const findIndex = names => header.findIndex(v => names.includes(v));
+    const li = findIndex(['仮番号','label','ラベル']); if (li >= 0) labelIdx = li;
+    const pi = findIndex(['パート','part','voice','声部']); if (pi >= 0) partIdx = pi;
+    const ni = findIndex(['氏名','名前','name','member','メンバー']); if (ni >= 0) nameIdx = ni;
+    const mi = findIndex(['メモ','memo','note','備考']); if (mi >= 0) memoIdx = mi;
+    const si = findIndex(['seat_id','seatid','id']); if (si >= 0) seatIdIdx = si;
+  }
+  const allSeats = getAllSeats();
+  const byId = {}; const byKey = {};
+  allSeats.forEach(function(seat) {
+    if (!seat || seat.empty) return;
+    if (seat.id) byId[seat.id] = seat;
+    if (seat.label && seat.part) byKey[seat.part + '::' + seat.label] = seat;
+  });
+  let updated = 0;
+  for (let r = startIndex; r < rows.length; r++) {
+    const row = rows[r];
+    const seatId = String(row[seatIdIdx] || '').trim();
+    const label = String(row[labelIdx] || '').trim();
+    const part = normalizePartClient(row[partIdx]);
+    const name = String(row[nameIdx] || '').trim();
+    const memo = String(row[memoIdx] || '').trim();
+    if (!seatId && !label && !name) continue;
+    const seat = (seatId && byId[seatId]) || (part && label && byKey[part + '::' + label]) || null;
+    if (!seat) { warnings.push((r + 1) + '行目: 対応するカードが見つかりませんでした。'); continue; }
+    seat.name = name;
+    if (memo) seat.memo = memo;
+    updated++;
+  }
+  state.counts = countFromLayout();
+  state.sourceMode = 'name-csv-applied';
+  saveDraftNow('name-csv-applied');
+  return { updated, warnings };
+}
+function showSheetLink(url, count, message) {
+  const box = document.getElementById('sheetLinkBox');
+  if (!box) return;
+  box.innerHTML = '<div>' + escapeHtml(message || '名前入力用CSVを保存しました。') + '</div>' +
+    '<div class="muted">対象カード数: ' + Number(count || 0) + ' 枚</div>';
+  box.classList.remove('hidden');
+}
+
+
+function reverseRowsHorizontally() { if (!state.rows || !state.rows.length) return; state.rows.forEach(row => row.seats.reverse()); commitHistory(); renderStage(); }
+function toggleDisplayMode() { const modes = ['name', 'label', 'part']; const labels = { name: '氏名', label: '仮番号', part: 'パート' }; const idx = modes.indexOf(state.displayMode); state.displayMode = modes[(idx + 1) % modes.length]; document.getElementById('displayModeBtn').textContent = '表示: ' + labels[state.displayMode]; renderStage(); }
+
+
+function exportLayoutAsPng() {
+  if (!state.rows || !state.rows.length) { alert('PNGにする配置がありません。'); return; }
+  closeMobileEditorMenu();
+  try {
+    const canvas = buildLayoutExportCanvas();
+    const fileName = buildLayoutPngFileName();
+    if (canvas.toBlob) {
+      canvas.toBlob(function(blob) {
+        if (!blob) { fallbackDownloadCanvas(canvas, fileName); return; }
+        triggerBlobDownload(blob, fileName);
+      }, 'image/png');
+    } else {
+      fallbackDownloadCanvas(canvas, fileName);
+    }
+  } catch (err) {
+    console.error(err);
+    alert('PNG画像の作成に失敗しました。');
+  }
+}
+function buildLayoutPngFileName() {
+  const rawTitle = (getCurrentTitle() || state.title || '合唱ステージ配置').trim();
+  const safeTitle = rawTitle.replace(/[\\/:*?"<>|]/g, '_').replace(/\s+/g, ' ').trim() || '合唱ステージ配置';
+  const d = new Date();
+  const stamp = d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) + '_' + pad2(d.getHours()) + pad2(d.getMinutes());
+  return safeTitle + '_' + stamp + '.png';
+}
+function triggerBlobDownload(blob, fileName) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function() { URL.revokeObjectURL(url); }, 4000);
+}
+function fallbackDownloadCanvas(canvas, fileName) {
+  const url = canvas.toDataURL('image/png');
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+function buildLayoutExportCanvas() {
+  ensureSeatIds();
+  const rows = (state.rows || []).slice().reverse();
+  const placedCounts = countFromRows(state.rows || []);
+  const unplacedCounts = countSeats(state.unplaced || []);
+  const allCounts = addCounts(placedCounts, unplacedCounts);
+  const maxSeats = Math.max(1, ...rows.map(row => (row.seats || []).length));
+  let seatW = 78, seatH = 52, gapX = 6, gapY = 28;
+  if (maxSeats > 42) { seatW = 54; seatH = 40; gapX = 4; gapY = 22; }
+  else if (maxSeats > 32) { seatW = 62; seatH = 44; gapX = 5; gapY = 24; }
+  else if (maxSeats > 24) { seatW = 70; seatH = 48; gapX = 5; gapY = 26; }
+  const seatPad = 4;
+  const rowLabelW = 92;
+  const rowInfoW = 168;
+  const shiftPad = 44;
+  const left = 36;
+  const top = 34;
+  const right = 36;
+  const bottom = 36;
+  const headerH = 92;
+  const legendH = 44;
+  const footerH = 20;
+  const rowBlockH = seatH + gapY;
+  const stageW = Math.max(440, maxSeats * seatW + Math.max(0, maxSeats - 1) * gapX + shiftPad);
+  const width = left + rowLabelW + stageW + rowInfoW + right;
+  const height = top + headerH + legendH + rows.length * rowBlockH + 70 + footerH + bottom;
+  const scale = width <= 1600 ? 2 : width <= 2600 ? 1.5 : 1;
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(width * scale);
+  canvas.height = Math.round(height * scale);
+  const ctx = canvas.getContext('2d');
+  ctx.scale(scale, scale);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = '#111827';
+  ctx.font = '700 28px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  const title = getCurrentTitle() || '無題の配置';
+  ctx.fillText(title, left, top + 24);
+  ctx.fillStyle = '#4b5563';
+  ctx.font = '14px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  ctx.fillText('配置中: ' + countsText(placedCounts), left, top + 52);
+  if (totalCounts(unplacedCounts) > 0) {
+    ctx.fillText('未配置: ' + countsText(unplacedCounts), left, top + 72);
+  }
+  ctx.textAlign = 'right';
+  ctx.fillStyle = '#6b7280';
+  ctx.fillText('パターン: ' + layoutTemplateName(state.layoutTemplate || getLayoutTemplateKey()) + ' / 千鳥配置: ' + staggerModeName(state.staggerMode || getStaggerMode()), width - right, top + 24);
+  ctx.fillText('合計: ' + countsText(allCounts), width - right, top + 52);
+  ctx.textAlign = 'left';
+
+  const legendY = top + headerH;
+  let lx = left;
+  orderedPartsForCounts(allCounts).forEach(function(part) {
+    const pillW = Math.max(48, ctx.measureText(part).width + 28);
+    drawRoundRect(ctx, lx, legendY, pillW, 26, 13, partColor(part), '#cbd5e1');
+    ctx.fillStyle = '#1f2937';
+    ctx.font = '700 13px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    ctx.fillText(part, lx + 14, legendY + 17);
+    lx += pillW + 8;
+  });
+
+  const stageTop = legendY + 42;
+  const seatOriginX = left + rowLabelW;
+  rows.forEach(function(row, displayIndex) {
+    const y = stageTop + displayIndex * rowBlockH;
+    const rowCounts = countSeats(row.seats || []);
+    ctx.fillStyle = '#6b7280';
+    ctx.font = '700 13px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(rowLabel(row.rowNo, state.rows.length), left + rowLabelW - 10, y + seatH / 2 - 4);
+    ctx.font = '12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    ctx.fillText(totalCounts(rowCounts) + '名', left + rowLabelW - 10, y + seatH / 2 + 14);
+    const shift = rowStaggerShiftPx(row.rowNo);
+    const rowWidth = Math.max(0, row.seats.length * seatW + Math.max(0, row.seats.length - 1) * gapX);
+    const xStart = seatOriginX + Math.max(0, (stageW - shiftPad - rowWidth) / 2) + shift;
+    (row.seats || []).forEach(function(seat, seatIndex) {
+      const x = xStart + seatIndex * (seatW + gapX);
+      drawSeatCardToCanvas(ctx, seat, x, y, seatW, seatH, seatPad);
+    });
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#6b7280';
+    ctx.font = '12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    ctx.fillText(shortCountsText(rowCounts), width - right - rowInfoW + 8, y + seatH / 2 + 4);
+  });
+
+  const conductorY = stageTop + rows.length * rowBlockH + 12;
+  const conductorW = 96;
+  drawRoundRect(ctx, width / 2 - conductorW / 2, conductorY, conductorW, 30, 15, '#ffffff', '#9ca3af');
+  ctx.fillStyle = '#374151';
+  ctx.font = '13px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('指揮者', width / 2, conductorY + 19);
+  ctx.textAlign = 'left';
+
+  const footerY = height - 18;
+  ctx.fillStyle = '#9ca3af';
+  ctx.font = '11px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  ctx.fillText('Generated by 合唱ステージ配置メーカー', left, footerY);
+  return canvas;
+}
+function staggerModeName(mode) {
+  if (mode === 'odd') return '奇数段を右に半マス';
+  if (mode === 'even') return '偶数段を右に半マス';
+  return 'なし';
+}
+function drawSeatCardToCanvas(ctx, seat, x, y, w, h, pad) {
+  const bg = seat.empty ? '#f3f4f6' : partColor(seat.part);
+  const border = seat.empty ? '#9ca3af' : '#94a3b8';
+  drawRoundRect(ctx, x, y, w, h, 10, bg, border, seat.empty);
+  ctx.fillStyle = '#111827';
+  ctx.textAlign = 'center';
+  ctx.font = '700 12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  ctx.fillText(seat.empty ? '-' : (seat.part || ''), x + w / 2, y + 15);
+  const nameText = getSeatDisplayTextForExport(seat);
+  ctx.font = '12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  drawSingleLineText(ctx, nameText, x + pad, y + 31, w - pad * 2);
+  if (state.displayMode === 'name' && seat.name && seat.label) {
+    ctx.fillStyle = '#6b7280';
+    ctx.font = '11px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    drawSingleLineText(ctx, seat.label, x + pad, y + 45, w - pad * 2);
+  }
+  ctx.textAlign = 'left';
+}
+function getSeatDisplayTextForExport(seat) {
+  if (!seat) return '';
+  if (seat.empty) return '空席';
+  if (state.displayMode === 'part') return PART_NAMES[seat.part] || seat.part || '';
+  if (state.displayMode === 'label') return seat.label || seat.part || '';
+  return seat.name || seat.label || seat.part || '';
+}
+function drawSingleLineText(ctx, text, x, y, maxWidth) {
+  const value = String(text == null ? '' : text);
+  let out = value;
+  if (ctx.measureText(out).width > maxWidth) {
+    while (out.length > 1 && ctx.measureText(out + '…').width > maxWidth) out = out.slice(0, -1);
+    out += '…';
+  }
+  ctx.fillText(out, x + maxWidth / 2, y);
+}
+function drawRoundRect(ctx, x, y, w, h, r, fill, stroke, dashed) {
+  const radius = Math.min(r, w / 2, h / 2);
+  ctx.save();
+  if (dashed) ctx.setLineDash([4, 3]);
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.arcTo(x + w, y, x + w, y + h, radius);
+  ctx.arcTo(x + w, y + h, x, y + h, radius);
+  ctx.arcTo(x, y + h, x, y, radius);
+  ctx.arcTo(x, y, x + w, y, radius);
+  ctx.closePath();
+  if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+  if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke(); }
+  ctx.restore();
+}
+
+
+function draftSnapshot() {
+  if (!state.rows || !state.rows.length) return null;
+  const snap = snapshotLayout();
+  snap.layout_id = state.layout_id || '';
+  snap.sourceMode = state.sourceMode || '';
+  snap.updatedAt = new Date().toISOString();
+  snap.draftVersion = 1;
+  return snap;
+}
+function scheduleAutoSave(reason) {
+  if (!state.rows || !state.rows.length) return;
+  if (autoSaveTimer) clearTimeout(autoSaveTimer);
+  updateAutoSaveStatus('保存中...');
+  autoSaveTimer = setTimeout(function(){ saveDraftNow(reason || 'auto'); }, 500);
+}
+function saveDraftNow(reason) {
+  if (!state.rows || !state.rows.length) return false;
+  try {
+    const snap = draftSnapshot();
+    if (!snap) return false;
+    localStorage.setItem(AUTO_DRAFT_KEY, JSON.stringify(snap));
+    lastAutoSaveAt = snap.updatedAt;
+    updateAutoSaveStatus('自動保存済み ' + formatDraftTime(snap.updatedAt));
+    renderDraftBanner();
+    return true;
+  } catch (err) {
+    console.warn('auto draft save failed', err);
+    updateAutoSaveStatus('自動保存できませんでした');
+    return false;
+  }
+}
+function loadDraft() {
+  try {
+    const raw = localStorage.getItem(AUTO_DRAFT_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data || !data.rows || !data.rows.length) return null;
+    return data;
+  } catch (err) {
+    console.warn('load draft failed', err);
+    return null;
+  }
+}
+function hasDraft() { return !!loadDraft(); }
+function restoreDraft() {
+  const data = loadDraft();
+  if (!data) { alert('復元できる下書きはありません。'); renderDraftBanner(); return; }
+  const parts = inferPartsFromLayoutData(data); setParts(parts);
+  state = Object.assign(freshState(), deepCopy(data));
+  state.parts = parts.slice();
+  state.partOrder = normalizePartsList(state.partOrder && state.partOrder.length ? state.partOrder : parts);
+  state.unplaced = state.unplaced || [];
+  state.selectedIds = [];
+  state.drag = null;
+  state.multiSelectMode = false;
+  state.trayOpen = false;
+  state.displayMode = state.displayMode || 'name';
+  ensureSeatIds();
+  state.counts = countFromLayout();
+  document.getElementById('layoutTitle').value = state.title || '';
+  const cti = document.getElementById('customTemplateText'); if (cti) cti.value = state.customTemplateText || '';
+  const tmpl = document.getElementById('layoutTemplate'); if (tmpl) tmpl.value = state.layoutTemplate || 'vertical';
+  updateLayoutTemplateDescription();
+  const stag = document.getElementById('staggerMode'); if (stag) stag.value = state.staggerMode || 'even';
+  renderPartOrderOptions(state.partOrder);
+  updateSummary();
+  mobileView.fitDone = false;
+  renderStage();
+  resetHistory();
+  updateAutoSaveStatus('下書きを復元 ' + formatDraftTime(data.updatedAt));
+  showTab('editor');
+}
+function discardDraft(confirmFirst) {
+  if (confirmFirst && !confirm('下書きを破棄しますか？この操作は元に戻せません。')) return;
+  try { localStorage.removeItem(AUTO_DRAFT_KEY); } catch (err) { console.warn(err); }
+  updateAutoSaveStatus('');
+  renderDraftBanner();
+}
+function showStartupDraftNotice() {
+  const draft = loadDraft();
+  if (!draft) return;
+  renderDraftBanner();
+}
+function renderDraftBanner() {
+  const box = document.getElementById('draftBanner');
+  if (!box) return;
+  const draft = loadDraft();
+  if (!draft) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+  const title = draft.title || '無題の配置';
+  const countText = countsText(addCounts(countFromRows(draft.rows || []), countSeats(draft.unplaced || [])));
+  box.innerHTML = '<div class="draft-banner-title">編集中の下書きがあります</div>' +
+    '<div>' + escapeHtml(title) + '　<span class="muted">' + escapeHtml(formatDraftTime(draft.updatedAt)) + ' 自動保存 / ' + escapeHtml(countText) + '</span></div>' +
+    '<div class="row"><button type="button" onclick="restoreDraft()">編集に戻る</button><button type="button" class="light" onclick="discardDraft(true)">下書きを破棄</button></div>';
+  box.classList.remove('hidden');
+}
+function updateAutoSaveStatus(text) {
+  const el = document.getElementById('autoSaveStatus');
+  if (el) el.textContent = text || '';
+}
+function formatDraftTime(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return pad2(d.getMonth() + 1) + '/' + pad2(d.getDate()) + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+}
+
+function snapshotLayout() { return deepCopy({ rows: state.rows || [], unplaced: state.unplaced || [], counts: state.counts || emptyCounts(), title: getCurrentTitle(), rowCount: state.rowCount, parts: state.parts || PARTS.slice(), partOrder: state.partOrder || PARTS.slice(), staggerMode: state.staggerMode || getStaggerMode(), layoutTemplate: state.layoutTemplate || getLayoutTemplateKey(), customTemplateText: state.customTemplateText || getCustomTemplateText(), displayMode: state.displayMode || 'name' }); }
+function applySnapshot(snap) { const parts = inferPartsFromLayoutData(snap); setParts(parts); state.rows = deepCopy(snap.rows || []); state.unplaced = deepCopy(snap.unplaced || []); state.parts = parts.slice(); state.counts = snap.counts || countFromLayout(); state.title = snap.title || state.title || ''; state.rowCount = snap.rowCount || state.rowCount; state.partOrder = normalizePartsList(snap.partOrder || parts); state.staggerMode = snap.staggerMode || state.staggerMode || 'even'; state.layoutTemplate = snap.layoutTemplate || state.layoutTemplate || 'vertical'; state.customTemplateText = snap.customTemplateText || state.customTemplateText || ''; const cti = document.getElementById('customTemplateText'); if (cti) cti.value = state.customTemplateText; state.displayMode = snap.displayMode || state.displayMode || 'name'; const tmpl = document.getElementById('layoutTemplate'); if (tmpl) tmpl.value = state.layoutTemplate; updateLayoutTemplateDescription(); const stag = document.getElementById('staggerMode'); if (stag) stag.value = state.staggerMode; renderPartOrderOptions(state.partOrder); document.getElementById('layoutTitle').value = state.title; syncEditorTitleInput(); ensureSeatIds(); renderStage(); }
+function resetHistory() { historyStack = [snapshotLayout()]; historyIndex = 0; updateHistoryButtons(); }
+function commitHistory() { if (!state.rows || !state.rows.length) return; const snap = snapshotLayout(); historyStack = historyStack.slice(0, historyIndex + 1); historyStack.push(snap); if (historyStack.length > 60) historyStack.shift(); historyIndex = historyStack.length - 1; updateHistoryButtons(); scheduleAutoSave('history'); }
+function undoLayout() { if (historyIndex <= 0) return; historyIndex -= 1; applySnapshot(historyStack[historyIndex]); saveDraftNow('undo'); }
+function redoLayout() { if (historyIndex >= historyStack.length - 1) return; historyIndex += 1; applySnapshot(historyStack[historyIndex]); saveDraftNow('redo'); }
+function updateHistoryButtons() { const u = document.getElementById('undoBtn'); const r = document.getElementById('redoBtn'); if (u) u.disabled = historyIndex <= 0; if (r) r.disabled = historyIndex < 0 || historyIndex >= historyStack.length - 1; }
+
+
+function layoutPayloadForStorage() {
+  state.title = getCurrentTitle() || '無題の配置';
+  document.getElementById('layoutTitle').value = state.title;
+  syncEditorTitleInput();
+  state.parts = PARTS.slice();
+  state.partOrder = state.partOrder || PARTS.slice();
+  state.staggerMode = getStaggerMode();
+  state.layoutTemplate = getLayoutTemplateKey();
+  state.customTemplateText = getCustomTemplateText();
+  state.counts = countFromLayout();
+  const payload = deepCopy(state);
+  delete payload.drag; delete payload.selectedIds; delete payload.lastSelectedId; delete payload.multiSelectMode;
+  payload.publicFormat = 'chorus-stage-layout';
+  payload.formatVersion = 1;
+  return payload;
+}
+function localLayoutsKey() { return 'chorusStageLayoutSavedLayouts.v1'; }
+function loadLocalLayoutRecords() {
+  try { return JSON.parse(localStorage.getItem(localLayoutsKey()) || '[]') || []; }
+  catch (err) { console.warn(err); return []; }
+}
+function saveLocalLayoutRecords(records) {
+  localStorage.setItem(localLayoutsKey(), JSON.stringify(records || []));
+}
+function saveCurrentLayout() {
+  if (!state.rows || !state.rows.length) { alert('保存する配置がありません。'); return; }
+  try {
+    const payload = layoutPayloadForStorage();
+    const now = new Date().toISOString();
+    if (!state.layout_id) state.layout_id = 'L' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    payload.layout_id = state.layout_id;
+    payload.updated_at = now;
+    const records = loadLocalLayoutRecords();
+    const idx = records.findIndex(r => r.layout_id === state.layout_id);
+    const record = {
+      layout_id: state.layout_id,
+      title: payload.title || '無題の配置',
+      total_count: totalCounts(payload.counts || {}),
+      part_counts: shortCountsText(payload.counts || {}),
+      data_json: JSON.stringify(payload),
+      created_at: idx >= 0 ? records[idx].created_at : now,
+      updated_at: now,
+    };
+    if (idx >= 0) records[idx] = record; else records.unshift(record);
+    saveLocalLayoutRecords(records);
+    saveDraftNow('saved-local');
+    alert('このブラウザに保存しました。');
+    refreshLayouts();
+  } catch (err) { showError(err); }
+}
+function saveAsCopy() {
+  if (!state.rows || !state.rows.length) { alert('保存する配置がありません。'); return; }
+  const oldId = state.layout_id;
+  state.layout_id = '';
+  const copyTitle = (getCurrentTitle() || '無題の配置') + ' コピー';
+  document.getElementById('layoutTitle').value = copyTitle;
+  const editorTitle = document.getElementById('layoutTitleEditor'); if (editorTitle) editorTitle.value = copyTitle;
+  state.title = copyTitle;
+  saveCurrentLayout();
+  if (!state.layout_id) state.layout_id = oldId;
+}
+function refreshLayouts() { renderLayoutList(loadLocalLayoutRecords()); }
+function renderLayoutList(list) {
+  const box = document.getElementById('layoutList'); box.innerHTML = '';
+  if (!list.length) { box.innerHTML = '<p class="muted">このブラウザの保存済み配置はまだありません。</p>'; return; }
+  list.forEach(function(item) {
+    const div = document.createElement('div'); div.className = 'layout-item';
+    div.innerHTML = '<div class="layout-item-title">' + escapeHtml(item.title || '無題の配置') + '</div><div class="muted">' + escapeHtml(item.part_counts || '') + ' / 更新 ' + escapeHtml(formatDraftTime(item.updated_at) || item.updated_at || '') + '</div><div class="row"><button class="small" onclick="openSavedLayout(\'' + item.layout_id + '\')">開く</button><button class="small ghost" onclick="copySavedLayout(\'' + item.layout_id + '\')">コピー</button><button class="small light" onclick="exportSavedLayoutFile(\'' + item.layout_id + '\')">ファイル保存</button><button class="small danger" onclick="deleteSavedLayout(\'' + item.layout_id + '\')">削除</button></div>';
+    box.appendChild(div);
+  });
+}
+function getLocalLayoutData(layoutId) {
+  const rec = loadLocalLayoutRecords().find(r => r.layout_id === layoutId);
+  if (!rec) throw new Error('保存済み配置が見つかりません。');
+  return JSON.parse(rec.data_json || '{}');
+}
+function loadLayoutDataObject(data, options) {
+  const parts = inferPartsFromLayoutData(data);
+  setParts(parts);
+  state = Object.assign(freshState(), deepCopy(data || {}));
+  state.parts = parts.slice();
+  state.partOrder = normalizePartsList(state.partOrder && state.partOrder.length ? state.partOrder : parts);
+  state.staggerMode = state.staggerMode || 'even';
+  state.layoutTemplate = state.layoutTemplate || 'vertical';
+  state.customTemplateText = state.customTemplateText || '';
+  const cti = document.getElementById('customTemplateText'); if (cti) cti.value = state.customTemplateText;
+  const tmpl = document.getElementById('layoutTemplate'); if (tmpl) tmpl.value = state.layoutTemplate; updateLayoutTemplateDescription();
+  const stag = document.getElementById('staggerMode'); if (stag) stag.value = state.staggerMode;
+  renderPartOrderOptions(state.partOrder);
+  state.sourceMode = options && options.sourceMode || state.sourceMode || 'saved-local';
+  if (options && options.copy) { state.layout_id = ''; state.title = (state.title || '無題の配置') + ' コピー'; }
+  state.unplaced = state.unplaced || [];
+  state.selectedIds = [];
+  state.counts = countFromLayout();
+  state.displayMode = state.displayMode || 'name';
+  ensureSeatIds();
+  document.getElementById('layoutTitle').value = state.title || '';
+  syncEditorTitleInput(); updateSummary(); mobileView.fitDone = false; renderStage(); resetHistory(); saveDraftNow('load-layout'); showTab('editor');
+}
+function openSavedLayout(layoutId) {
+  try { loadLayoutDataObject(getLocalLayoutData(layoutId), { sourceMode: 'saved-local' }); }
+  catch (err) { showError(err); }
+}
+function copySavedLayout(layoutId) {
+  try { loadLayoutDataObject(getLocalLayoutData(layoutId), { sourceMode: 'saved-local', copy: true }); }
+  catch (err) { showError(err); }
+}
+function deleteSavedLayout(layoutId) {
+  if (!confirm('このブラウザの保存済み配置を削除しますか？')) return;
+  const records = loadLocalLayoutRecords().filter(r => r.layout_id !== layoutId);
+  saveLocalLayoutRecords(records);
+  refreshLayouts();
+}
+function exportCurrentLayoutFile() {
+  if (!state.rows || !state.rows.length) { alert('保存する配置がありません。'); return; }
+  const payload = layoutPayloadForStorage();
+  if (!payload.layout_id) payload.layout_id = state.layout_id || 'FILE_' + Date.now().toString(36);
+  downloadTextFile(JSON.stringify(payload, null, 2), buildLayoutDataFileName(payload.title), 'application/json;charset=utf-8');
+}
+function exportSavedLayoutFile(layoutId) {
+  try {
+    const data = getLocalLayoutData(layoutId);
+    downloadTextFile(JSON.stringify(data, null, 2), buildLayoutDataFileName(data.title), 'application/json;charset=utf-8');
+  } catch (err) { showError(err); }
+}
+function buildLayoutDataFileName(title) {
+  const rawTitle = (title || getCurrentTitle() || '合唱ステージ配置').trim();
+  const safeTitle = rawTitle.replace(/[\\/:*?"<>|]/g, '_').replace(/\s+/g, ' ').trim() || '合唱ステージ配置';
+  const d = new Date();
+  return safeTitle + '_' + d.getFullYear() + pad2(d.getMonth()+1) + pad2(d.getDate()) + '.choruslayout';
+}
+function openLayoutFilePicker() {
+  const input = document.getElementById('layoutFileInput');
+  if (input) input.click();
+}
+function importLayoutFile(event) {
+  const file = event && event.target && event.target.files && event.target.files[0];
+  if (!file) return;
+  readTextFile(file).then(function(text) {
+    const data = JSON.parse(text);
+    if (!data || !data.rows || !data.rows.length) throw new Error('配置ファイルの形式が正しくありません。');
+    data.layout_id = data.layout_id || '';
+    loadLayoutDataObject(data, { sourceMode: 'layout-file' });
+  }).catch(showError).finally(function(){ if (event.target) event.target.value = ''; });
+}
+
+
+function newBlank() { if (state.rows && state.rows.length && !confirm('現在の編集内容を閉じて新規作成しますか？下書きは破棄されます。')) return; discardDraft(false); state = freshState(); candidates = []; historyStack = []; historyIndex = -1; document.getElementById('layoutTitle').value = ''; const editorTitle = document.getElementById('layoutTitleEditor'); if (editorTitle) editorTitle.value = ''; document.getElementById('candidateGrid').innerHTML = ''; document.getElementById('stageContainer').innerHTML = ''; const linkBox = document.getElementById('sheetLinkBox'); if (linkBox) linkBox.classList.add('hidden'); const inputLinkBox = document.getElementById('inputSheetLinkBox'); if (inputLinkBox) inputLinkBox.classList.add('hidden'); showWarnings([]); updateSummary(); updateHistoryButtons(); showTab('candidates'); }
+function showTab(name) { if (name === 'candidates' && state.rows && state.rows.length) saveDraftNow('back-to-candidates'); document.getElementById('candidatePane').classList.toggle('hidden', name !== 'candidates'); document.getElementById('editorPane').classList.toggle('hidden', name !== 'editor'); document.getElementById('tabCandidates').classList.toggle('active', name === 'candidates'); document.getElementById('tabEditor').classList.toggle('active', name === 'editor'); document.body.classList.toggle('editor-mode', name === 'editor'); updateDeviceClasses(); if (name === 'editor') { syncEditorTitleInput(); closeMobileEditorMenu(); if (isMobileLike()) setTimeout(function(){ if (!mobileView.fitDone) fitStageToScreen(true); else applyStageTransform(); }, 60); } else { closeMobileEditorMenu(); renderDraftBanner(); } }
+function getCurrentTitle() { const editorTitle = document.getElementById('layoutTitleEditor'); const baseTitle = document.getElementById('layoutTitle').value || state.title || '無題の配置'; if (document.body.classList.contains('editor-mode') && editorTitle && editorTitle.value) return editorTitle.value; return baseTitle; }
+function syncEditorTitleInput() { const editorTitle = document.getElementById('layoutTitleEditor'); if (!editorTitle) return; const title = document.getElementById('layoutTitle').value || state.title || ''; if (document.activeElement !== editorTitle) editorTitle.value = title; }
+function syncTitleFromEditor() { const value = document.getElementById('layoutTitleEditor').value || ''; document.getElementById('layoutTitle').value = value; state.title = value; const h = document.querySelector('.stage-title h2'); if (h) h.textContent = value || '無題の配置'; scheduleAutoSave('title'); }
+
+function assignNamesToLayout(rows, unplaced, members) {
+  const parts = inferPartsFromMembers(members);
+  setParts(parts, { skipState: true });
+  const pools = {}; const idx = {};
+  parts.forEach(part => { pools[part] = (members || []).filter(m => m.part === part).sort((a, b) => (Number(a.order) || 9999) - (Number(b.order) || 9999)); idx[part] = 0; });
+  const apply = function(seat) {
+    if (!seat.empty && seat.part) {
+      if (!pools[seat.part]) { pools[seat.part] = []; idx[seat.part] = 0; }
+      const member = pools[seat.part][idx[seat.part]];
+      idx[seat.part] += 1;
+      if (member) { seat.name = member.name || ''; seat.label = member.label || seat.label; } else seat.name = '';
+    }
+  };
+  (rows || []).forEach(row => (row.seats || []).forEach(apply));
+  (unplaced || []).forEach(apply);
+}
+function countMembers(members) { const c = emptyCounts(inferPartsFromMembers(members)); (members || []).forEach(m => { const p = normalizePartClient(m.part); if (p) c[p] = Number(c[p] || 0) + 1; }); return c; }
+function countFromRows(rows) { const c = emptyCounts(); (rows || []).forEach(row => (row.seats || []).forEach(seat => { if (!seat.empty && seat.part) c[seat.part] = Number(c[seat.part] || 0) + 1; })); return c; }
+function countSeats(seats) { const c = emptyCounts(); (seats || []).forEach(seat => { if (!seat.empty && seat.part) c[seat.part] = Number(c[seat.part] || 0) + 1; }); return c; }
+function countFromLayout() { return addCounts(countFromRows(state.rows || []), countSeats(state.unplaced || [])); }
+function addCounts(a, b) { const parts = normalizePartsList([...(PARTS || []), ...Object.keys(a || {}), ...Object.keys(b || {})]); const c = emptyCounts(parts); parts.forEach(part => c[part] = Number(a && a[part] || 0) + Number(b && b[part] || 0)); return c; }
+function emptyCounts(parts) { const c = {}; normalizePartsList(parts || PARTS).forEach(part => c[part] = 0); return c; }
+function orderedPartsForCounts(c) { return normalizePartsList([...(PARTS || []), ...Object.keys(c || {})]); }
+function shortCountsText(c) { return orderedPartsForCounts(c).map(part => part + (Number(c && c[part] || 0))).join(' '); }
+function totalCounts(c) { return Object.keys(c || {}).reduce((sum, p) => sum + Number(c[p] || 0), 0); }
+function countsText(c) { return orderedPartsForCounts(c).map(part => part + ' ' + (Number(c && c[part] || 0))).join(' / ') + ' / 合計 ' + totalCounts(c); }
+function rowLabel(rowNo, rowCount) { if (rowNo === 1) return '前列'; if (rowNo === rowCount) return '後列'; return '第' + rowNo + '列'; }
+function strategyName(key) { return (STRATEGIES.find(s => s.key === key) || {}).name || key; }
+function strategyDesc(key) { return (STRATEGIES.find(s => s.key === key) || {}).desc || ''; }
+function locateSeat(id) { for (let r = 0; r < (state.rows || []).length; r++) { const i = (state.rows[r].seats || []).findIndex(s => s.id === id); if (i >= 0) return { type: 'row', r, i }; } const ti = (state.unplaced || []).findIndex(s => s.id === id); if (ti >= 0) return { type: 'tray', r: -1, i: ti }; return null; }
+function getSeatById(id) { const loc = locateSeat(id); if (!loc) return null; return loc.type === 'row' ? state.rows[loc.r].seats[loc.i] : state.unplaced[loc.i]; }
+function getAllSeats() { const seats = []; (state.rows || []).forEach(row => seats.push(...(row.seats || []))); seats.push(...(state.unplaced || [])); return seats; }
+function ensureSeatIds() { getAllSeats().forEach(seat => { if (!seat.id) seat.id = newSeatId(seat.part || 'empty'); }); }
+function pad2(num) { return ('0' + num).slice(-2); }
+function rowsToCsv(rows) {
+  return '\uFEFF' + (rows || []).map(function(row) {
+    return (row || []).map(function(value) {
+      const s = String(value == null ? '' : value);
+      return '"' + s.replace(/"/g, '""') + '"';
+    }).join(',');
+  }).join('\r\n');
+}
+function downloadTextFile(text, fileName, mimeType) {
+  const blob = new Blob([text], { type: mimeType || 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName || 'download.txt';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+}
+function deepCopy(obj) { return JSON.parse(JSON.stringify(obj)); }
+function escapeHtml(str) { return String(str == null ? '' : str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;'); }
+function escapeAttr(str) { return escapeHtml(str).replace(/`/g, '&#096;'); }
+</script>
+</body>
+</html>
