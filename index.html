@@ -2,7 +2,6 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <base target="_top">
   <style>
     :root {
@@ -154,6 +153,7 @@
     .seat.B { background: var(--B); }
     .seat.empty { background: var(--empty); color: #9ca3af; border-style: dashed; }
     .seat.selected { outline: 3px solid var(--selected); transform: translateY(-1px); }
+    .seat.drag-over { outline: 3px solid var(--accent); outline-offset: 2px; }
     .seat.dragging { opacity: .45; }
     .seat.tray-seat { opacity: .96; }
     .seat-part { font-weight: 800; font-size: 12px; line-height: 1.1; }
@@ -1282,6 +1282,7 @@ function seatHtml(seat, sourceType, rowIndex, seatIndex) {
     'onclick="seatClick(event,\'' + seat.id + '\')" ondblclick="seatDoubleClick(event,\'' + seat.id + '\')" ' +
     'oncontextmenu="openSeatMenu(event,\'' + seat.id + '\')" ' +
     'onpointerdown="seatPointerDown(event,\'' + seat.id + '\')" onpointerup="seatPointerUp(event)" onpointercancel="seatPointerCancel(event)" ' +
+    'ondragover="seatDragOver(event,\'' + seat.id + '\')" ondragleave="dragLeave(event)" ondrop="dropToSeatBody(event,\'' + seat.id + '\')" ' +
     'ondragstart="dragSeatStart(event,\'' + seat.id + '\')" ondragend="dragEnd()">' +
     '<div class="seat-part">' + escapeHtml(seat.empty ? '-' : seat.part) + '</div><div class="seat-name">' + escapeHtml(nameText) + '</div>' +
     (state.displayMode === 'name' && seat.name && seat.label ? '<div class="seat-label">' + escapeHtml(seat.label) + '</div>' : '') + '</div>';
@@ -1712,7 +1713,12 @@ function showMobileInsertPreview(target, x, y) {
   let lineX = x;
   let lineTop = y - 36;
   let lineHeight = 46;
-  if (target.type === 'row') {
+  let showLine = true;
+  if (target.type === 'swap') {
+    const seat = getSeatById(target.seatId);
+    text = (seatLabelForPreview(seat) || 'このカード') + ' と入れ替え';
+    showLine = false;
+  } else if (target.type === 'row') {
     const rowNo = Number(target.rowIndex) + 1;
     const rowName = rowLabel(rowNo, state.rows.length);
     text = rowName + '：' + insertLabelForTarget(target, state.rows[target.rowIndex] ? state.rows[target.rowIndex].seats : []);
@@ -1726,12 +1732,14 @@ function showMobileInsertPreview(target, x, y) {
   bubble.textContent = text || 'ここに挿入';
   bubble.style.left = Math.min(window.innerWidth - 20, Math.max(20, x)) + 'px';
   bubble.style.top = Math.max(42, y - 44) + 'px';
-  const line = document.createElement('div');
-  line.className = 'mobile-insert-line';
-  line.style.left = lineX + 'px';
-  line.style.top = lineTop + 'px';
-  line.style.height = lineHeight + 'px';
-  document.body.appendChild(line);
+  if (showLine) {
+    const line = document.createElement('div');
+    line.className = 'mobile-insert-line';
+    line.style.left = lineX + 'px';
+    line.style.top = lineTop + 'px';
+    line.style.height = lineHeight + 'px';
+    document.body.appendChild(line);
+  }
   document.body.appendChild(bubble);
 }
 function clearMobileInsertPreview() {
@@ -1743,6 +1751,11 @@ function insertLabelForTarget(target, seats) {
   if (idx <= 0) return (seats[0].label || seats[0].part || '先頭') + ' の前に挿入';
   if (idx >= seats.length) return (seats[seats.length - 1].label || seats[seats.length - 1].part || '末尾') + ' の後に挿入';
   return (seats[idx - 1].label || seats[idx - 1].part || '') + ' と ' + (seats[idx].label || seats[idx].part || '') + ' の間に挿入';
+}
+function seatLabelForPreview(seat) {
+  if (!seat) return '';
+  if (seat.empty) return '空席';
+  return seat.label || seat.name || seat.part || '';
 }
 function insertionGeometry(container, index) {
   if (!container) return null;
@@ -1768,6 +1781,13 @@ function findMobileDropTarget(x, y) {
   if (trash) return { type: 'trash', el: trash };
   const trayList = el.closest('.tray-list');
   if (trayList) return { type: 'tray', index: mobileInsertIndexFromContainer(trayList, x), el: trayList };
+  const seatEl = el.closest('.seat[data-seat-id]');
+  if (seatEl && mobileSeatDrag && !mobileSeatDrag.fromPalette && mobileSeatDrag.ids && mobileSeatDrag.ids.length === 1) {
+    const targetSeatId = seatEl.getAttribute('data-seat-id');
+    if (targetSeatId && !mobileSeatDrag.ids.includes(targetSeatId) && isPointInSwapHotZone(seatEl, x, y)) {
+      return { type: 'swap', seatId: targetSeatId, el: seatEl };
+    }
+  }
   const row = el.closest('.stage-row');
   if (row) return { type: 'row', rowIndex: Number(row.getAttribute('data-row')), index: mobileInsertIndexFromContainer(row, x), el: row };
   const tray = el.closest('.tray-wrap.open');
@@ -1804,6 +1824,23 @@ function mobileInsertIndexFromContainer(container, x) {
   });
   return index;
 }
+function isPointInSwapHotZone(el, x, y) {
+  if (!el) return false;
+  const r = el.getBoundingClientRect();
+  const left = r.left + r.width * 0.28;
+  const right = r.left + r.width * 0.72;
+  const top = r.top + r.height * 0.15;
+  const bottom = r.top + r.height * 0.85;
+  return x >= left && x <= right && y >= top && y <= bottom;
+}
+function insertIndexNearSeatElement(el, x) {
+  const seatId = el ? el.getAttribute('data-seat-id') : '';
+  const loc = seatId ? locateSeat(seatId) : null;
+  if (!loc) return null;
+  const r = el.getBoundingClientRect();
+  const after = x > r.left + r.width / 2 ? 1 : 0;
+  return { loc: loc, insertIndex: loc.i + after };
+}
 function finishMobileSeatDrag(x, y) {
   const dragInfo = mobileSeatDrag;
   const target = dragInfo ? dragInfo.target || findMobileDropTarget(x, y) : null;
@@ -1823,8 +1860,9 @@ function finishMobileSeatDrag(x, y) {
     }
     renderStage(); return;
   }
-  if (target.type === 'row') moveIdsToRow(ids, target.rowIndex, target.index);
-  if (target.type === 'tray') moveIdsToTray(ids, target.index);
+  if (target.type === 'swap') swapSeatIds(ids[0], target.seatId);
+  else if (target.type === 'row') moveIdsToRow(ids, target.rowIndex, target.index);
+  else if (target.type === 'tray') moveIdsToTray(ids, target.index);
 }
 function isMobileDropBackToOrigin(dragInfo, target, x, y) {
   if (!dragInfo || !dragInfo.ids || !dragInfo.ids.length) return false;
@@ -1912,6 +1950,31 @@ function cssEscape(value) {
   return String(value).replace(/[^a-zA-Z0-9_-]/g, '\\$&');
 }
 
+function seatDragOver(event, targetSeatId) {
+  const drag = getDragData(event);
+  if (!drag || !drag.type) return;
+  event.preventDefault();
+  const target = event.currentTarget;
+  if (target) target.classList.add('drag-over');
+}
+function dropToSeatBody(event, targetSeatId) {
+  event.preventDefault();
+  event.stopPropagation();
+  const drag = getDragData(event);
+  const targetSeat = getSeatById(targetSeatId);
+  const targetLoc = locateSeat(targetSeatId);
+  if (!drag || !targetSeat || !targetLoc) { state.drag = null; renderStage(); return; }
+  const ids = drag.ids || [];
+  const canSwap = drag.type === 'ids' && ids.length === 1 && ids[0] !== targetSeatId && isPointInSwapHotZone(event.currentTarget, event.clientX, event.clientY);
+  if (canSwap) {
+    swapSeatIds(ids[0], targetSeatId);
+    return;
+  }
+  const info = insertIndexNearSeatElement(event.currentTarget, event.clientX);
+  if (!info) { state.drag = null; renderStage(); return; }
+  if (info.loc.type === 'row') insertDragIntoRow(drag, info.loc.r, info.insertIndex);
+  else insertDragIntoTray(drag, info.insertIndex);
+}
 function dragSeatStart(event, seatId) {
   if (isMobileLike()) { event.preventDefault(); return false; }
   hideContextMenu(); cancelLongPress(); if (singleClickTimer) { clearTimeout(singleClickTimer); singleClickTimer = null; } clickSuppressUntil = Date.now() + 250;
@@ -1944,7 +2007,11 @@ function finishDropByOrderChange(beforeSignature, selectedItems) {
   renderStage();
 }
 function dropToRowAt(event, rowIndex, insertIndex) {
-  event.preventDefault(); event.stopPropagation(); const drag = getDragData(event); if (!state.rows[rowIndex]) return;
+  event.preventDefault(); event.stopPropagation();
+  insertDragIntoRow(getDragData(event), rowIndex, insertIndex);
+}
+function insertDragIntoRow(drag, rowIndex, insertIndex) {
+  if (!state.rows[rowIndex]) return;
   const beforeSignature = layoutOrderSignature();
   const adjusted = adjustInsertIndexAfterRemoval(rowIndex, insertIndex, drag);
   const items = takeDraggedItems(drag, { type: 'row', r: rowIndex, i: insertIndex }); if (!items.length) return;
@@ -1953,12 +2020,33 @@ function dropToRowAt(event, rowIndex, insertIndex) {
 }
 function dropToTray(event) { event.preventDefault(); event.stopPropagation(); dropToTrayAt(event, state.unplaced.length); }
 function dropToTrayAt(event, insertIndex) {
-  event.preventDefault(); event.stopPropagation(); const drag = getDragData(event); state.unplaced = state.unplaced || [];
+  event.preventDefault(); event.stopPropagation();
+  insertDragIntoTray(getDragData(event), insertIndex);
+}
+function insertDragIntoTray(drag, insertIndex) {
+  state.unplaced = state.unplaced || [];
   const beforeSignature = layoutOrderSignature();
   const adjusted = adjustTrayInsertIndexAfterRemoval(insertIndex, drag);
   const items = takeDraggedItems(drag, { type: 'tray', r: -1, i: insertIndex }); if (!items.length) return;
   state.unplaced.splice(adjusted, 0, ...items);
   finishDropByOrderChange(beforeSignature, items);
+}
+function swapSeatIds(sourceId, targetId) {
+  if (!sourceId || !targetId || sourceId === targetId) { state.drag = null; renderStage(); return; }
+  const sourceLoc = locateSeat(sourceId);
+  const targetLoc = locateSeat(targetId);
+  if (!sourceLoc || !targetLoc) { state.drag = null; renderStage(); return; }
+  const sourceList = sourceLoc.type === 'row' ? state.rows[sourceLoc.r].seats : state.unplaced;
+  const targetList = targetLoc.type === 'row' ? state.rows[targetLoc.r].seats : state.unplaced;
+  const beforeSignature = layoutOrderSignature();
+  const tmp = sourceList[sourceLoc.i];
+  sourceList[sourceLoc.i] = targetList[targetLoc.i];
+  targetList[targetLoc.i] = tmp;
+  state.drag = null;
+  state.selectedIds = [sourceId];
+  state.lastSelectedId = sourceId;
+  if (beforeSignature !== layoutOrderSignature()) commitHistory();
+  renderStage();
 }
 function dropToTrash(event) {
   event.preventDefault(); event.stopPropagation(); const drag = getDragData(event); if (!drag || drag.type === 'new') { state.drag = null; renderStage(); return; }
@@ -2042,6 +2130,7 @@ function deleteSelectedSeats() { if (!state.selectedIds.length) return; if (!con
 function moveSelectedToTray() { if (!state.selectedIds || !state.selectedIds.length) { alert('未配置へ移動したいカードを選択してください。'); return; } const items = removeSeatsByIds(state.selectedIds); state.unplaced = state.unplaced || []; state.unplaced.push(...items); state.selectedIds = items.map(s => s.id); commitHistory(); renderStage(); }
 
 function openSeatMenu(event, seatId) {
+  if (isMobileLike()) { event.preventDefault(); event.stopPropagation(); cancelLongPress(); return; }
   event.preventDefault(); event.stopPropagation(); cancelLongPress(); state.selectedIds = state.selectedIds.includes(seatId) ? state.selectedIds : [seatId];
   const loc = locateSeat(seatId); const items = [];
   if (loc && loc.type === 'row') {
@@ -2050,13 +2139,14 @@ function openSeatMenu(event, seatId) {
   items.push(['編集', () => openEditDialogById(seatId)], ['未配置へ移動', () => moveSeatIdToTray(seatId)], ['削除', () => deleteSeatId(seatId), 'danger']);
   showContextMenu(event, items); renderStage();
 }
-function openRowMenu(event, rowIndex, insertIndex) {
+function openRowMenu(event, rowIndex, insertIndex, allowMobile) {
+  if (isMobileLike() && !allowMobile) { event.preventDefault(); event.stopPropagation(); cancelLongPress(); return; }
   event.preventDefault(); event.stopPropagation(); cancelLongPress();
   const items = [['ここに空席を追加', () => addSeatAt(rowIndex, insertIndex, 'empty')], 'sep'];
   PARTS.forEach(function(part) { items.push(['ここに ' + part + ' を追加', () => addSeatAt(rowIndex, insertIndex, part)]); });
   showContextMenu(event, items);
 }
-function addSeatMenuFromButton(event, rowIndex, insertIndex) { openRowMenu(event, rowIndex, insertIndex); }
+function addSeatMenuFromButton(event, rowIndex, insertIndex) { openRowMenu(event, rowIndex, insertIndex, true); }
 function showContextMenu(event, items) {
   const menu = document.getElementById('contextMenu'); menu.innerHTML = '';
   items.forEach(function(item) {
